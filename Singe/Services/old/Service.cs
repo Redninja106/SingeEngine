@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 
-namespace Singe.Services
+namespace Singe.Services.old
 {
     public class Service
     {
