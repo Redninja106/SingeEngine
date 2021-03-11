@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Singe.Services.old
+namespace Singe.Services
 {
     public sealed class CommandAttribute : Attribute
     {
