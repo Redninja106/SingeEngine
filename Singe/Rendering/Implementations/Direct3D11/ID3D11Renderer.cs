@@ -7,6 +7,6 @@ namespace Singe.Rendering.Implementations.Direct3D11
 {
     internal interface ID3D11Renderer
     {
-        ID3D11Device Device { get; }
+        D3D11DeviceBase DeviceBase { get; }
     }
 }

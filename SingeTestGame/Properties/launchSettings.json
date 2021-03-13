@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SingeTestGame": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}

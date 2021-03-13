@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Singe
 {
-    public interface IRenderingOutput
+    public interface IRenderingOutput : IDisposable
     {
         GraphicsApi GetGraphicsApi();
 
@@ -16,8 +16,5 @@ namespace Singe
         /// </summary>
         /// <param name="vsync"></param>
         void Present(int vsync);
-
-        bool RequestResize(int width, int height);
-
     }
 }

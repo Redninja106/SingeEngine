@@ -23,13 +23,17 @@ namespace Singe.Rendering
 
         private protected void UnregisterDisposableObject(IDisposable disposableObject)
         {
-            disposables.Remove(disposableObject);
+            UnregisterDisposableObject(disposableObject, false);
         }
 
-        private protected void DisposeDisposableObject(IDisposable disposableObject)
+        private protected void UnregisterDisposableObject(IDisposable disposableObject, bool dispose)
         {
-            UnregisterDisposableObject(disposableObject);
-            disposableObject.Dispose();
+            disposables.Remove(disposableObject);
+
+            if(dispose)
+            {
+                disposableObject.Dispose();
+            }
         }
 
         public virtual void Dispose()
