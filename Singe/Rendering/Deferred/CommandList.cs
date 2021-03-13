@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Singe.Rendering.Deferred
 {
-    public abstract class CommandList : GraphicsResource
+    public abstract class CommandList : GraphicsResource, IRenderingContext
     {
         public abstract void ExecuteCommandList(CommandList commandList);
         public abstract void SetRenderTarget(RenderTarget renderTarget);

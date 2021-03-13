@@ -5,16 +5,11 @@ using System.Collections.Generic;
 
 namespace SingeTestGame
 {
-    class BasicService : Service
+    class BasicService
     {
         static void Main(string[] args)
         {
-            var s = new HelloService();
-            var p = new BasicService();
-            while (true)
-            {
-                SubmitCommand(Console.ReadLine());
-            }
+            new BasicService().Run();
         }
 
         public void SetColor(string color)
@@ -26,9 +21,16 @@ namespace SingeTestGame
         {
             Application.Run(Singe.Rendering.RenderingMode.Immediate);
         }
+
+        [Command]
+        public void Say(string words, int count)
+        {
+            for (int i = 0; i < count; i++)
+                Console.WriteLine(words);
+        }
     }
 
-    class HelloService : Service
+    class HelloService
     {
         public void SetColor(string color)
         {

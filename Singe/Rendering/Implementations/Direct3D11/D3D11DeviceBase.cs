@@ -1,38 +1,29 @@
-﻿using Singe.Rendering.Deferred;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Vortice.Direct3D;
 using Vortice.Direct3D11;
 
-namespace Singe.Rendering.Implementations.Direct3D11.Deferred
+namespace Singe.Rendering.Implementations.Direct3D11
 {
-    internal class D3D11DeferredRenderer : DeferredRenderer, ID3D11Renderer
+    class D3D11DeviceBase
     {
         #region statics
-
-        public static bool CheckSupport()
-        {
-            return true;
-        }
 
         private static DeviceCreationFlags GetDeviceFlags()
         {
             var flags = DeviceCreationFlags.None;
-#if DEBUG
+//#if DEBUG
             flags |= DeviceCreationFlags.Debug;
-#endif
+//#endif
             return flags;
         }
-
-        #endregion statics
-
-        public D3D11DeviceBase DeviceBase => null;
+        #endregion
 
         public ID3D11Device Device { get; private set; }
         public ID3D11DeviceContext ImmediateContext { get; private set; }
 
-        public D3D11DeferredRenderer() : base(GraphicsApi.Direct3D11)
+        public D3D11DeviceBase()
         {
             CreateDevice();
         }
@@ -46,16 +37,8 @@ namespace Singe.Rendering.Implementations.Direct3D11.Deferred
 
             this.Device = device;
             this.ImmediateContext = context;
-        }
 
-        public override CommandList CreateCommandList()
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void ExecuteCommandList(CommandList commandList)
-        {
-            throw new NotImplementedException();
+            
         }
     }
 }

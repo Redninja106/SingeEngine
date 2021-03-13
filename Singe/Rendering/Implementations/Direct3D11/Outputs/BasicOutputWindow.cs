@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Text;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
+using static PInvoke.User32;
+using static PInvoke.Kernel32;
+using System.Runtime.CompilerServices;
 
 namespace Singe.Rendering.Implementations.Direct3D11.Outputs
 {
@@ -13,6 +16,38 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
         ID3D11Renderer renderer;
         D3D11RenderTarget rt;
 
+        static IntPtr hinst = GetModuleHandle(null);
+        static WndProc basicWndProc;
+
+        unsafe static BasicOutputWindow()
+        {
+            WNDCLASSEX wndclass;
+            basicWndProc = BasicWndProc;
+
+            fixed (char* pName = "test")
+            {
+                wndclass = new WNDCLASSEX()
+                {
+                    lpszClassName = pName,
+                    hInstance = hinst,
+                    lpfnWndProc = basicWndProc,
+                    cbSize = Unsafe.SizeOf<WNDCLASSEX>(),
+                };
+            }
+
+            var atom =  RegisterClassEx(ref wndclass);
+
+            if(atom == 0)
+            {
+                throw new Exception();
+            }
+        }
+
+        unsafe static IntPtr BasicWndProc(IntPtr hwnd, WindowMessage msg, void* wParam, void* lParam)
+        {
+            return DefWindowProc(hwnd, msg, (IntPtr)wParam, (IntPtr)lParam);
+        }
+
         public GraphicsApi GetGraphicsApi()
         {
             return GraphicsApi.Direct3D11;
@@ -20,8 +55,16 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
 
         public BasicOutputWindow(ID3D11Renderer renderer)
         {
+            hwnd = CreateWindow("test", "test", WindowStyles.WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,CW_USEDEFAULT,512,512, IntPtr.Zero, IntPtr.Zero, hinst, IntPtr.Zero);
+            
+            if(hwnd == IntPtr.Zero)
+            {
+                throw new Exception();
+            }
+
+            ShowWindow(hwnd, WindowShowStyle.SW_SHOW);
             this.renderer = renderer;
-            var device = renderer.Device;
+            var device = renderer.DeviceBase.Device;
 
             using var dxgidev = device.QueryInterface<IDXGIDevice>();
             var hr = dxgidev.GetAdapter(out IDXGIAdapter adapter);
@@ -45,7 +88,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
         {
             swapchain.Dispose();
             rt.Dispose();
-            //DestroyWindow(hwnd);
+            DestroyWindow(hwnd);
         }
 
         public RenderTarget GetRenderTarget()

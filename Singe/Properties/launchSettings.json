@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Singe": {
+      "commandName": "Project",
+      "nativeDebugging": true
+    }
+  }
+}
