@@ -50,11 +50,6 @@ namespace Singe
                     throw new Exception("Unkown mode!");
             }
 
-            if (false)//outputFactory == null)
-            {
-                outputFactory = Renderer.GetDefaultRenderingOutputForRenderer(Renderer);
-            }
-
             var wm = WindowManager.Create();
 
             outputFactory = wm;

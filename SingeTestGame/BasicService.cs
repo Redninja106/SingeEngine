@@ -9,7 +9,10 @@ namespace SingeTestGame
     {
         static void Main(string[] args)
         {
-            new BasicService().Run();
+            while(true)
+            {
+                Service.SubmitCommandString(Console.ReadLine());
+            }
         }
 
         public void SetColor(string color)
