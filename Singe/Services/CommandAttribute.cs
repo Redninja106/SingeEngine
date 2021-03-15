@@ -6,11 +6,11 @@ namespace Singe.Services
 {
     public sealed class CommandAttribute : Attribute
     {
-        public CommandAttribute()
+        public CommandAttribute(string serviceName = "")
         {
-
+            this.serviceName = serviceName;
         }
 
-        public string Namespace { get; set; }
+        internal string serviceName;
     }
 }

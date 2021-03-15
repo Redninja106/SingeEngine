@@ -1,6 +1,8 @@
-﻿using System;
+﻿using Singe.Services.Parsing;
+using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 
@@ -8,7 +10,15 @@ namespace Singe.Services
 {
     public static class Service
     {
-        public static Dictionary<string, MethodInfo> MethodLookup = new Dictionary<string, MethodInfo>();
+        internal static List<Command> RegisteredCommands = new List<Command>();
+        internal static InvocationBuilder TreeBuilder = new InvocationBuilder();
+        internal static object lastResult;
+
+        static Service()
+        {
+            RegisterAssembly(Assembly.GetEntryAssembly());
+            RegisterAssembly(Assembly.GetExecutingAssembly());
+        }
 
         /// <summary>
         /// Searches an assembly for commands and registers those commands. By default, the assembly returned by <see cref="Assembly.GetEntryAssembly"/> is searched. Libraries should call this upon their initialization.
@@ -22,65 +32,95 @@ namespace Singe.Services
                 {
                     foreach (var attribute in method.CustomAttributes)
                     {
-                        if(attribute.AttributeType == typeof(CommandAttribute))
+                        if (attribute.AttributeType == typeof(CommandAttribute))
                         {
-                            RegisterMethod(method);
+                            var attr = method.GetCustomAttribute<CommandAttribute>();
+
+                            if (RegisteredCommands.Any(c => c.Signature.Name.ToLower() == method.Name.ToLower() && c.Signature.ServiceName.ToLower() == attr.serviceName.ToLower()))
+                            {
+                                Console.WriteLine($"Command {method.Name.ToLower()} is already present in the service '{attr.serviceName.ToLower()}'");
+                            }
+                            else 
+                            {
+                                RegisterMethod(method);
+                            } 
                         }
                     }
                 } 
             }
         }
 
-        public static void RegisterMethod(MethodInfo info)
+        private static void RegisterMethod(MethodInfo info)
         {
-            MethodLookup.Add(SignatureToString(info), info);
-        }
-
-        private static string SignatureToString(MethodInfo methodInfo)
-        {
-            string result = methodInfo.ReturnType.AssemblyQualifiedName;
-            result += " " + methodInfo.Name.ToLower();
-
-            foreach (var p in methodInfo.GetParameters())
-            {
-                result += " " + p.ParameterType.AssemblyQualifiedName;
-            }
-
-            return result;
-        }
-
-        private static string SignatureToString(Type returnType, string name, Type[] parameters)
-        {
-            string result = returnType.AssemblyQualifiedName;
-            result += " " + name.ToLower();
-
-            foreach (var p in parameters)
-            {
-                result += " " + p.AssemblyQualifiedName;
-            }
-
-            return result;
-        }
-
-        private static (Type returnType, string name, Type[] parameters) StringToSignature(string signature)
-        {
-            var parts = signature.Split(' ');
-
-            Type returnType = Type.GetType(parts[1]);
-            string name = parts[2];
-            Type[] parameters = new Type[parts.Length - 2];
-
-            for (int i = 2; i < parameters.Length; i++)
-            {
-                parameters[i] = Type.GetType(parts[i]);
-            }
-
-            return (returnType, name, parameters);
-        }
-
-        public static void CallCommand(string commandString)
-        {
+            Command command;
             
+            var attr = info.GetCustomAttribute<CommandAttribute>();
+            
+            if (attr.serviceName != "")
+            {
+                command = new Command(info, attr.serviceName);
+            }
+            else
+            {
+                command = new Command(info, info.DeclaringType.Name);
+            }
+
+            RegisteredCommands.Add(command);
+        }
+
+        public static void SubmitCommandString(string commandString)
+        {
+            //try
+            //{
+                var invocations = TreeBuilder.GetInvocations(commandString);
+
+                foreach (var invocation in invocations)
+                {
+                    if (!InvokeCommand(invocation))
+                    {
+                        Console.WriteLine("Unrecognized command");
+                    }
+                }
+            //}
+            //catch(Exception ex)
+            //{
+            //    Console.WriteLine(ex);
+            //}
+        }
+
+        public static bool InvokeCommand(CommandInvocation invocation)
+        {
+            Command command;
+            if (invocation.Service == "")
+            {
+                var candidates = RegisteredCommands.Where(c => c.Signature.Name == invocation.Name);
+                
+                if(candidates.Count() < 1)
+                {
+                    Console.WriteLine("unrecognized Command");
+                }
+
+                if(candidates.Count() > 1)
+                {
+                    Console.WriteLine("Ambiguous reference to two or more commands.");
+                }
+
+                command = candidates.First();
+            }
+            else
+            {
+                command = RegisteredCommands.Find(c => c.Signature.ServiceName == invocation.Service && c.Signature.Name == invocation.Name);
+            }
+
+            if (command != null)
+            {
+                lastResult = command.Invoke(lastResult, invocation.Parameters.ToArray());
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }
