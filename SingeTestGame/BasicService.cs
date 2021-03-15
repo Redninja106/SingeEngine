@@ -9,10 +9,9 @@ namespace SingeTestGame
     {
         static void Main(string[] args)
         {
-            //new BasicService().Run();
             while(true)
             {
-                Service.CallCommand(Console.ReadLine());
+                Service.SubmitCommandString(Console.ReadLine());
             }
         }
 
