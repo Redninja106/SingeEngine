@@ -57,5 +57,25 @@ namespace Singe.Rendering.Implementations.Direct3D11.Deferred
         {
             throw new NotImplementedException();
         }
+
+        public override Shader CompileShader(ShaderTypeFlags types, string source)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override BufferResource<T> CreateBuffer<T>(BufferType type, int capacity, T[] data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Texture2D CreateTexture2D(byte[] data, DataFormat format, int width, int height)
+        {
+            throw new NotImplementedException();
+        }
+
+        public override Shader CompileShader(ShaderTypeFlags types, string source, VertexLayoutElement[] vertexLayout = null)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

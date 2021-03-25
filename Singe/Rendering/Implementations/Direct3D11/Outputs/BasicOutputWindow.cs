@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 namespace Singe.Rendering.Implementations.Direct3D11.Outputs
 {
-    class BasicOutputWindow : IRenderingOutput
+    public class BasicOutputWindow : IRenderingOutput
     {
         IDXGISwapChain1 swapchain;
         IntPtr hwnd;
@@ -52,8 +52,36 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
         {
             return GraphicsApi.Direct3D11;
         }
+        public BasicOutputWindow(ID3D11Device device)
+        {
+            hwnd = CreateWindow("test", "test", WindowStyles.WS_OVERLAPPEDWINDOW, CW_USEDEFAULT, CW_USEDEFAULT, 512, 512, IntPtr.Zero, IntPtr.Zero, hinst, IntPtr.Zero);
 
-        public BasicOutputWindow(ID3D11Renderer renderer)
+            if (hwnd == IntPtr.Zero)
+            {
+                throw new Exception();
+            }
+
+            ShowWindow(hwnd, WindowShowStyle.SW_SHOW);
+
+            using var dxgidev = device.QueryInterface<IDXGIDevice>();
+            var hr = dxgidev.GetAdapter(out IDXGIAdapter adapter);
+            if (hr.Failure)
+                throw new Exception();
+            var factory = adapter.GetParent<IDXGIFactory2>();
+
+            adapter.Dispose();
+
+            swapchain = factory.CreateSwapChainForHwnd(device, hwnd, new SwapChainDescription1(500, 500));
+            var t = swapchain.GetBuffer<ID3D11Texture2D>(0);
+
+            var rtv = device.CreateRenderTargetView(t, new RenderTargetViewDescription(t, RenderTargetViewDimension.Texture2D, format: t.Description.Format));
+
+            rt = new D3D11RenderTarget(rtv);
+
+            t.Dispose();
+        }
+
+        internal BasicOutputWindow(ID3D11Renderer renderer)
         {
             hwnd = CreateWindow("test", "test", WindowStyles.WS_OVERLAPPEDWINDOW, CW_USEDEFAULT,CW_USEDEFAULT,512,512, IntPtr.Zero, IntPtr.Zero, hinst, IntPtr.Zero);
             
@@ -110,7 +138,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
         {
             public IRenderingOutput CreateOutput(Renderer renderer)
             {
-                return new BasicOutputWindow((ID3D11Renderer)renderer);
+                return null;// new BasicOutputWindow((ID3D11Renderer)renderer);
             }
 
             public GraphicsApi[] GetSupportedApis()

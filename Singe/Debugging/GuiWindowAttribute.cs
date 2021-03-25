@@ -2,9 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Singe.Rendering
+namespace Singe.Debugging
 {
-    public abstract class RenderTarget : GraphicsObject
+    public sealed class GuiWindowAttribute : Attribute
     {
+
     }
 }

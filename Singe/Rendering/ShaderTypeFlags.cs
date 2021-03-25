@@ -4,7 +4,9 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public abstract class RenderTarget : GraphicsObject
+    public enum ShaderTypeFlags
     {
+        Vertex = 1 << 0,
+        Pixel =  1 << 1,
     }
 }

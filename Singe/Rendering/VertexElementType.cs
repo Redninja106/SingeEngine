@@ -4,7 +4,11 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public abstract class RenderTarget : GraphicsObject
+    public enum VertexElementType
     {
+        Int,
+        Uint,
+        Float,
+        Unorm
     }
 }

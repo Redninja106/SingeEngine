@@ -28,6 +28,8 @@ namespace Singe.Platforms
         public abstract Point GetPosition();
         public abstract string GetTitle();
 
+        public abstract InputDevice CreateInputDevice();
+
         public abstract IRenderingOutput CreateOutput(Renderer renderer);
         public abstract GraphicsApi[] GetSupportedApis();
 

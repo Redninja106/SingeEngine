@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Singe.Rendering
+namespace Singe
 {
-    public abstract class RenderTarget : GraphicsObject
+    public sealed class MessageListener : Attribute
     {
     }
 }
