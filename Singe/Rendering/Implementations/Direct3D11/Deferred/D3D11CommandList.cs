@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
 
-namespace Singe.Rendering.Implementations.Direct3D11
+namespace Singe.Rendering.Implementations.Direct3D11.Deferred
 {
     internal sealed class D3D11CommandList : CommandList
     {

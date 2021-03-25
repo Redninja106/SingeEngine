@@ -30,7 +30,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
             var hr = dxgidev.GetAdapter(out IDXGIAdapter adapter);
             if (hr.Failure)
                 throw new Exception();
-            var factory = adapter.GetParent<IDXGIFactory7>();
+            var factory = adapter.GetParent<IDXGIFactory2>();
 
             adapter.Dispose();
 

@@ -1,11 +1,13 @@
-﻿using System;
+﻿using Singe.Rendering;
+using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Numerics;
 using System.Text;
 
 namespace Singe
 {
-    public static class MathExtensions
+    public static class Extensions
     {
         public static Vector3 ToEulers(this Quaternion quaternion)
         {
@@ -28,6 +30,22 @@ namespace Singe
             yaw = MathF.Atan2(siny_cosp, cosy_cosp);
 
             return new Vector3(pitch, yaw, roll);
+        }
+
+        public static Vector2 ToVector2(this Size size)
+        {
+            return new Vector2(size.Width, size.Height);
+        }
+
+        public static int GetBytesPerPixel(this DataFormat format)
+        {
+            switch (format)
+            {
+                case DataFormat.RGBA32:
+                    return 4;
+                default:
+                    return 0;
+            }
         }
     }
 }

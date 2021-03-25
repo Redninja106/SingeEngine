@@ -13,6 +13,7 @@ namespace Singe.Services
         internal static List<Command> RegisteredCommands = new List<Command>();
         internal static InvocationBuilder TreeBuilder = new InvocationBuilder();
         internal static object lastResult;
+        internal static Dictionary<Key, string> keyCommandBindings = new Dictionary<Key, string>();
 
         static Service()
         {
@@ -70,22 +71,22 @@ namespace Singe.Services
 
         public static void SubmitCommandString(string commandString)
         {
-            //try
-            //{
+            try
+            {
                 var invocations = TreeBuilder.GetInvocations(commandString);
 
                 foreach (var invocation in invocations)
                 {
                     if (!InvokeCommand(invocation))
                     {
-                        Console.WriteLine("Unrecognized command");
+                        //Console.WriteLine("Unrecognized command");
                     }
                 }
-            //}
-            //catch(Exception ex)
-            //{
-            //    Console.WriteLine(ex);
-            //}
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+            }
         }
 
         public static bool InvokeCommand(CommandInvocation invocation)
@@ -93,23 +94,25 @@ namespace Singe.Services
             Command command;
             if (invocation.Service == "")
             {
-                var candidates = RegisteredCommands.Where(c => c.Signature.Name == invocation.Name);
+                var candidates = RegisteredCommands.Where(c => c.Signature.Name == invocation.Name.ToLower());
                 
                 if(candidates.Count() < 1)
                 {
-                    Console.WriteLine("unrecognized Command");
+                    Console.WriteLine("Unrecognized Command");
+                    return false;
                 }
 
                 if(candidates.Count() > 1)
                 {
                     Console.WriteLine("Ambiguous reference to two or more commands.");
+                    return false;
                 }
 
                 command = candidates.First();
             }
             else
             {
-                command = RegisteredCommands.Find(c => c.Signature.ServiceName == invocation.Service && c.Signature.Name == invocation.Name);
+                command = RegisteredCommands.Find(c => c.Signature.ServiceName == invocation.Service.ToLower() && c.Signature.Name == invocation.Name.ToLower());
             }
 
             if (command != null)
@@ -120,6 +123,32 @@ namespace Singe.Services
             else
             {
                 return false;
+            }
+        }
+
+        public static void BindCommandToKey(Key key, string command)
+        {
+            if(command == null)
+            {
+                keyCommandBindings.Remove(key);
+            }
+
+            if (keyCommandBindings.ContainsKey(key))
+            {
+                keyCommandBindings[key] = command;
+            }
+
+            keyCommandBindings.Add(key, command);
+        }
+
+        internal static void CallKeyCommandBindings()
+        {
+            foreach (var entry in keyCommandBindings)
+            {
+                if(Input.GetKeyDown(entry.Key))
+                {
+                    SubmitCommandString(entry.Value);
+                }
             }
         }
     }

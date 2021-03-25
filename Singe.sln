@@ -7,7 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Singe", "Singe\Singe.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Singe.Editor", "Singe.Editor\Singe.Editor.csproj", "{54999845-CF2C-42D4-8AB0-06C8CE7D9D00}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SingeTestGame", "SingeTestGame\SingeTestGame.csproj", "{E972E474-07E5-4D1A-9F7F-7043C90583DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SingeTestGame", "SingeTestGame\SingeTestGame.csproj", "{E972E474-07E5-4D1A-9F7F-7043C90583DE}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

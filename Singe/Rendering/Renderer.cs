@@ -11,7 +11,7 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public abstract class Renderer : GraphicsResource
+    public abstract class Renderer : GraphicsObject
     {
         #region statics
 
@@ -82,5 +82,20 @@ namespace Singe.Rendering
         {
             this.RenderingOutput = output;
         }
+
+        public abstract Shader CompileShader(ShaderTypeFlags types, string source);
+        public abstract Shader CompileShader(ShaderTypeFlags types, string source, VertexLayoutElement[] vertexLayout);
+
+        public BufferResource<T> CreateBuffer<T>(BufferType type, T[] data) where T : unmanaged
+        {
+            return CreateBuffer(type, data.Length, data);
+        }
+        public BufferResource<T> CreateBuffer<T>(BufferType type, int capacity) where T : unmanaged
+        {
+            return CreateBuffer(type, capacity, new T[capacity]);
+        }
+        public abstract BufferResource<T> CreateBuffer<T>(BufferType type, int capacity, T[] data) where T : unmanaged;
+
+        public abstract Texture2D CreateTexture2D(byte[] data, DataFormat format, int width, int height);
     }
 }
