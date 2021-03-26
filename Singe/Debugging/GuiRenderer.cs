@@ -12,8 +12,24 @@ namespace Singe.Debugging
 {
     internal static class GuiRenderer
     {
-        private static string shaderSource =
-                @"cbuffer vertexBuffer : register(b0)
+        private static string psSource =
+                @"struct PS_INPUT
+                {
+                float4 pos : SV_POSITION;
+                float4 col : COLOR0;
+                float2 uv  : TEXCOORD0;
+                };
+                sampler sampler0;
+                Texture2D texture0;
+            
+                float4 main(PS_INPUT input) : SV_Target
+                {
+                float4 out_col = input.col * texture0.Sample(sampler0, input.uv);
+                return out_col;
+                }
+                ";
+        private static string vsSource =
+            @"cbuffer vertexBuffer : register(b0) 
             {
               float4x4 ProjectionMatrix; 
             };
@@ -24,46 +40,32 @@ namespace Singe.Debugging
               float2 uv  : TEXCOORD0;
             };
             
-            sampler sampler0;
-            Texture2D texture0;
             struct PS_INPUT
-            {\
+            {
               float4 pos : SV_POSITION;
               float4 col : COLOR0;
               float2 uv  : TEXCOORD0;
             };
             
-            PS_INPUT vsmain(VS_INPUT input)
+            PS_INPUT main(VS_INPUT input)
             {
-                PS_INPUT output;
-                output.pos = mul(ProjectionMatrix, float4(input.pos.xy, 0.f, 1.f));
-                 output.col = input.col;
-                output.uv = input.uv;
-                return output;
-            }
-
-            
-            float4 psmain(PS_INPUT input) : SV_Target
-            {
-                float4 out_col = input.col * texture0.Sample(sampler0, input.uv); 
-                return out_col; 
+              PS_INPUT output;
+              output.pos = mul( ProjectionMatrix, float4(input.pos.xy, 0.f, 1.f));
+              output.col = input.col;
+              output.uv  = input.uv;
+              return output;
             }";
 
         private static Renderer renderer;
-        private static IRenderingContext context;
+        private static CommandList commandList;
 
-        static Dictionary<IntPtr, Texture2D> textures = new Dictionary<IntPtr, Texture2D>();
-        static Dictionary<Texture2D, IntPtr> textureIds = new Dictionary<Texture2D, IntPtr>();
+        static Dictionary<IntPtr, Texture> textures = new Dictionary<IntPtr, Texture>();
+        static Dictionary<Texture, IntPtr> textureIds = new Dictionary<Texture, IntPtr>();
         static int nextId = 1;
 
-        static Texture2D fontTexture;
-        static BufferResource<ImDrawVert> vertexBuffer;
-        static BufferResource<ushort> indexBuffer;
-        static BufferResource<Matrix4x4> constantBuffer;
-        static Shader shader;
-        static ID3D11RasterizerState rsState;
-        static ID3D11DepthStencilState dsState;
-        static ID3D11BlendState blendState;
+        static Texture fontTexture;
+        static IndexedMesh<ImDrawVert> mesh;
+        static Material material;
 
         public static void Render()
         {
@@ -74,10 +76,10 @@ namespace Singe.Debugging
             RenderDrawData(ImGui.GetDrawData());
         }
 
-        internal static unsafe void Initialize(Renderer renderer, IRenderingContext context)
+        internal static unsafe void Initialize(Renderer renderer)
         {
             GuiRenderer.renderer = renderer;
-            GuiRenderer.context = context;
+            commandList = renderer.CreateCommandList();
 
             ImGui.CreateContext();
             ImGuiIOPtr io = ImGui.GetIO();
@@ -94,7 +96,7 @@ namespace Singe.Debugging
             //    pixelData[i * 4 + 3] = pixels[i];
             //}
 
-            fontTexture = renderer.CreateTexture2D(pixelData.ToArray(), DataFormat.RGBA32, width, height);
+            fontTexture = renderer.CreateTexture(width, height, DataFormat.R8G8B8A8, pixelData.ToArray());
 
             io.Fonts.SetTexID(RegisterTexture(fontTexture));
 
@@ -119,35 +121,18 @@ namespace Singe.Debugging
             io.KeyMap[(int)ImGuiKey.Y] = (int)Key.Y;
             io.KeyMap[(int)ImGuiKey.Z] = (int)Key.Z;
 
-            vertexBuffer = renderer.CreateBuffer<ImDrawVert>(BufferType.VertexBuffer, 1);
-            indexBuffer = renderer.CreateBuffer<ushort>(BufferType.IndexBuffer, 1);
-            constantBuffer = renderer.CreateBuffer<Matrix4x4>(BufferType.ConstantBuffer, 1);
+            mesh = renderer.CreateIndexedMesh<ImDrawVert>(null, null);
+            material = renderer.CreateMaterial();
 
-            shader = renderer.CompileShader(ShaderTypeFlags.Pixel | ShaderTypeFlags.Vertex, shaderSource, new[]
-            {
-                new VertexLayoutElement("POSITION", 2, 32, VertexElementType.Float, 0),
-                new VertexLayoutElement("TEXCOORD", 2, 32, VertexElementType.Float, 0),
-                new VertexLayoutElement("COLOR", 4, 8, VertexElementType.Unorm, 0),
-            });
-
-            var d3d11Renderer = (D3D11ImmediateRenderer)context;
-            var rsDesc = new RasterizerDescription(CullMode.None, FillMode.Solid);
-            rsDesc.DepthClipEnable = false;
-            rsState = d3d11Renderer.DeviceBase.Device.CreateRasterizerState(rsDesc);
-            var dsDesc = new DepthStencilDescription(false, false);
-            dsState = d3d11Renderer.DeviceBase.Device.CreateDepthStencilState(dsDesc);
-            var blendDesc = new BlendDescription(Blend.SourceAlpha, Blend.InverseSourceAlpha, Blend.One, Blend.InverseSourceAlpha);
-            blendDesc.RenderTarget[0].BlendOperationAlpha = BlendOperation.Add;
-            blendDesc.RenderTarget[0].RenderTargetWriteMask = ColorWriteEnable.All;
-            blendState = d3d11Renderer.DeviceBase.Device.CreateBlendState(blendDesc);
+            var ps = renderer.CreateShader(ShaderType.Pixel, psSource);
+            var vs = renderer.CreateShader(ShaderType.Vertex, vsSource);
         }
 
         internal static void Uninitialize()
         {
-            fontTexture.Dispose();
-            vertexBuffer.Dispose();
-            indexBuffer.Dispose();
-            constantBuffer.Dispose();
+            mesh.Dispose();
+            material.Dispose();
+
             ImGui.DestroyContext();
         }
 
@@ -159,7 +144,7 @@ namespace Singe.Debugging
                 return;
 
             // set render state
-            var d3d11Renderer = (D3D11ImmediateRenderer)context;
+            var d3d11Renderer = (D3D11Renderer)context;
 
             d3d11Renderer.D3DContext.RSSetState(rsState);
             d3d11Renderer.D3DContext.OMSetDepthStencilState(dsState);
@@ -257,7 +242,7 @@ namespace Singe.Debugging
             context.ClearState();
         }
 
-        internal static IntPtr RegisterTexture(Texture2D texture)
+        internal static IntPtr RegisterTexture(Texture texture)
         {
             var id = new IntPtr(nextId++);
             textures.Add(id, texture);
@@ -265,7 +250,7 @@ namespace Singe.Debugging
             return id;
         }
 
-        internal static void UnregisterTexture(Texture2D texture)
+        internal static void UnregisterTexture(Texture texture)
         {
             var id = textureIds[texture];
             textures.Remove(id);

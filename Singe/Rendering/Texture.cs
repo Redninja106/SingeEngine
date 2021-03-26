@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public abstract class Texture2D : GraphicsResource
+    public abstract class Texture
     {
+
     }
 }

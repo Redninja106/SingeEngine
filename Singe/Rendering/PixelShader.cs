@@ -4,11 +4,8 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public enum VertexElementType
+    public abstract class PixelShader : Shader
     {
-        Int,
-        Uint,
-        Float,
-        Unorm
+
     }
 }

@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Singe.Rendering
+namespace Singe.Rendering.Implementations.Direct3D11
 {
-    public abstract class RenderTarget : GraphicsObject
+    class D3D11Texture
     {
     }
 }
