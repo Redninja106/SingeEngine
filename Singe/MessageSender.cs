@@ -6,7 +6,7 @@ namespace Singe
 {
     public static class MessageSender
     {
-        public void InvokeMessage()
+        public static void InvokeMessage()
         {
 
         }

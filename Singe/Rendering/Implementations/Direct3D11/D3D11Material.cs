@@ -6,7 +6,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
 {
     internal sealed class D3D11Material : Material
     {
-        public D3D11Material(string name) : base(name)
+        public D3D11Material() : base()
         {
         }
     }

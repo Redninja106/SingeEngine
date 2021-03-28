@@ -1,6 +1,5 @@
 ﻿using ImGuiNET;
 using Singe.Rendering;
-using Singe.Rendering.Implementations.Direct3D11.Immediate;
 using System;
 using System.Collections.Generic;
 using System.Drawing;

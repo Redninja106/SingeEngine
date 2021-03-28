@@ -2,7 +2,6 @@
 using Singe.Debugging;
 using Singe.Platforms;
 using Singe.Rendering;
-using Singe.Rendering.Immediate;
 using Singe.Services;
 using System;
 using System.Collections.Generic;
@@ -32,38 +31,13 @@ namespace Singe
         [Command]
         public static void Run()
         {
-            Run(RenderingMode.Immediate);
-        }
-
-        public static void Run(GraphicsApi api)
-        {
-            Run(api, RenderingMode.Immediate);
-        }
-
-        public static void Run(RenderingMode mode)
-        {
-            Run(Renderer.GetBestSupportedGraphicsApi(), mode);
-        }
-
-        public static void Run(GraphicsApi api, RenderingMode mode)
-        {
-            switch (mode) 
-            {
-                case RenderingMode.Immediate:
-                    Renderer = Renderer.CreateImmediate(api);
-                    break;
-                case RenderingMode.Deferred:
-                    Renderer = Renderer.CreateDeferred(api);
-                    break;
-                default:
-                    throw new Exception("Unkown mode!");
-            }
+            Renderer = Renderer.Create(GraphicsApi.Direct3D11);
 
             WindowManager = WindowManager.Create();
             
             var factoryApis = WindowManager.GetSupportedApis();
 
-            if (!factoryApis.Contains(Renderer.API))
+            if (!factoryApis.Contains(Renderer.GetApi()))
                 throw new Exception("Rendering output factory doesnt not support this api!");
 
             Output = WindowManager.CreateOutput(Renderer);
@@ -72,9 +46,7 @@ namespace Singe
 
             Input.SetDevice(WindowManager.CreateInputDevice());
 
-            var r = (ImmediateRenderer)Renderer;
-
-            GuiRenderer.Initialize(r, r);
+            GuiRenderer.Initialize(Renderer);
 
             Service.BindCommandToKey(Key.F1, "Application:ToggleConsole");
 
@@ -123,8 +95,8 @@ namespace Singe
                 }
                 // render game
 
-                r.SetRenderTarget(Output.GetRenderTarget());
-                r.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
+                Renderer.SetRenderTarget(Output.GetRenderTarget());
+                Renderer.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
                 
                 // update game
 
@@ -140,7 +112,7 @@ namespace Singe
         public static void Exit(int code)
         {
             // dispose everything
-            Gui.Uninitialize();
+            GuiRenderer.Uninitialize();
             Renderer.Dispose();
             WindowManager.Dispose();
             Output.Dispose();

@@ -41,7 +41,7 @@ namespace Singe
         {
             switch (format)
             {
-                case DataFormat.RGBA32:
+                case DataFormat.R8G8B8A8:
                     return 4;
                 default:
                     return 0;

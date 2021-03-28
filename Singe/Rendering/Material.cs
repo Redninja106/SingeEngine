@@ -18,14 +18,21 @@ namespace Singe.Rendering
         public MaterialShaderStage<VertexShader> VertexShader { get; private set; }
         public MaterialShaderStage<PixelShader> PixelShader { get; private set; } 
 
-        public Material(string name)
+        public Material()
         {
-            this.Name = name;
-            materials.Add(name, this);
+            this.Name = "New Material";
+            materials.Add(Name, this);
         }
 
         public void Dispose()
         {
+        }
+
+        public void SetName(string name)
+        {
+            materials.Remove(this.Name);
+            this.Name = name;
+            materials.Add(this.Name, this);
         }
     }
 }

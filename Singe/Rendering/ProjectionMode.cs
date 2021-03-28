@@ -4,8 +4,9 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public abstract class Shader
+    public enum ProjectionMode
     {
-        public abstract ShaderReflection GetShaderReflection();
+        Perspective,
+        Orthographic
     }
 }

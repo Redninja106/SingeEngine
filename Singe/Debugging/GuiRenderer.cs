@@ -1,6 +1,5 @@
 ﻿using ImGuiNET;
 using Singe.Rendering;
-using Singe.Rendering.Implementations.Direct3D11.Immediate;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -57,14 +56,13 @@ namespace Singe.Debugging
             }";
 
         private static Renderer renderer;
-        private static CommandList commandList;
 
         static Dictionary<IntPtr, Texture> textures = new Dictionary<IntPtr, Texture>();
         static Dictionary<Texture, IntPtr> textureIds = new Dictionary<Texture, IntPtr>();
         static int nextId = 1;
 
         static Texture fontTexture;
-        static IndexedMesh<ImDrawVert> mesh;
+        static Mesh<ImDrawVert> mesh;
         static Material material;
 
         public static void Render()
@@ -79,7 +77,6 @@ namespace Singe.Debugging
         internal static unsafe void Initialize(Renderer renderer)
         {
             GuiRenderer.renderer = renderer;
-            commandList = renderer.CreateCommandList();
 
             ImGui.CreateContext();
             ImGuiIOPtr io = ImGui.GetIO();
@@ -121,11 +118,14 @@ namespace Singe.Debugging
             io.KeyMap[(int)ImGuiKey.Y] = (int)Key.Y;
             io.KeyMap[(int)ImGuiKey.Z] = (int)Key.Z;
 
-            mesh = renderer.CreateIndexedMesh<ImDrawVert>(null, null);
+            mesh = renderer.CreateMesh<ImDrawVert>(null);
             material = renderer.CreateMaterial();
 
-            var ps = renderer.CreateShader(ShaderType.Pixel, psSource);
-            var vs = renderer.CreateShader(ShaderType.Vertex, vsSource);
+            var vs = renderer.CreateVertexShader(psSource);
+            var ps = renderer.CreatePixelShader(vsSource);
+
+            material.VertexShader.Set(vs);
+            material.PixelShader.Set(ps);
         }
 
         internal static void Uninitialize()
@@ -143,35 +143,12 @@ namespace Singe.Debugging
             if (drawData.TotalVtxCount == 0)
                 return;
 
-            // set render state
-            var d3d11Renderer = (D3D11Renderer)context;
-
-            d3d11Renderer.D3DContext.RSSetState(rsState);
-            d3d11Renderer.D3DContext.OMSetDepthStencilState(dsState);
-            d3d11Renderer.D3DContext.OMSetBlendState(blendState, Color.Black, int.MaxValue);
-
-            context.SetPrimitiveType(PrimitiveType.TriangleList);
-            context.SetVertexShader(shader);
-            //context.SetPixelShader(shader);
-            context.SetRenderTarget(Application.Output.GetRenderTarget());
-            context.SetViewport(drawData.DisplayPos.X, drawData.DisplayPos.Y, drawData.DisplaySize.X, drawData.DisplaySize.Y, 0, 1);
-
-            // size all buffers properly
-            //if (vertexBuffer.ElementCount < drawData.TotalVtxCount)
-            //{
-            //    vertexBuffer.Resize(drawData.TotalVtxCount + 5000);
-            //}
-
-            //if (indexBuffer.ElementCount < drawData.TotalIdxCount)
-            //{
-            //    indexBuffer.Resize(drawData.TotalIdxCount + 10000);
-            //}
 
             // update buffers
             var vertices = new ImDrawVert[drawData.TotalVtxCount];
             int vtxOffset = 0;
 
-            var indices = new ushort[drawData.TotalIdxCount];
+            var indices = new int[drawData.TotalIdxCount];
             int idxOffset = 0;
 
 
@@ -190,23 +167,21 @@ namespace Singe.Debugging
                 idxOffset += cmd.IdxBuffer.Size;
             }
 
-            vertexBuffer.SetData(vertices);
-            indexBuffer.SetData(indices);
             float L = drawData.DisplayPos.X;
             float R = drawData.DisplayPos.X + drawData.DisplaySize.X;
             float T = drawData.DisplayPos.Y;
             float B = drawData.DisplayPos.Y + drawData.DisplaySize.Y;
 
-            constantBuffer.SetData(new[] { new Matrix4x4(
-                2f/(R-L), 0, 0, 0,
-                0, 2f/(T-B), 0, 0,
+            material.VertexShader.ConstantBuffers[0] = new Matrix4x4(
+                2f / (R - L), 0, 0, 0,
+                0, 2f / (T - B), 0, 0,
                 0, 0, .5f, 0,
-                (R+L)/(L-R), (T+B)/(B-T), .5f, 1.0f
-                ) });
+                (R + L) / (L - R), (T + B) / (B - T), .5f, 1.0f
+                );
 
-            context.SetVertexBuffer(vertexBuffer);
-            context.SetIndexBuffer(indexBuffer);
-            shader.SetConstantBuffer(constantBuffer, 0);
+            mesh.SetVertices(vertices);
+            mesh.SetIndices(indices);
+
             //make draw calls
             vtxOffset = 0;
             idxOffset = 0;
@@ -227,11 +202,11 @@ namespace Singe.Debugging
                     }
                     else
                     {
-                        shader.SetResource(textures[pcmd.TextureId], 0);
-                        context.SetPixelShader(shader);
-                        context.SetClippingRectangles(new[] { new Rectangle((int)(pcmd.ClipRect.X - drawData.DisplayPos.X), (int)(pcmd.ClipRect.Y - drawData.DisplayPos.Y), (int)(pcmd.ClipRect.Z - drawData.DisplayPos.X), (int)(pcmd.ClipRect.W - drawData.DisplayPos.Y)) });
+                        material.PixelShader.Textures[0] = textures[pcmd.TextureId];
+                        
+                        renderer.SetClippingRectangles(new[] { new Rectangle((int)(pcmd.ClipRect.X - drawData.DisplayPos.X), (int)(pcmd.ClipRect.Y - drawData.DisplayPos.Y), (int)(pcmd.ClipRect.Z - drawData.DisplayPos.X), (int)(pcmd.ClipRect.W - drawData.DisplayPos.Y)) });
 
-                        context.DrawIndexed((int)pcmd.ElemCount, idxOffset, vtxOffset);
+                        renderer.DrawMesh(mesh);
                     }
                     idxOffset += (int)pcmd.ElemCount;
                 }
@@ -239,7 +214,7 @@ namespace Singe.Debugging
             }
 
             // reset renderer state
-            context.ClearState();
+            renderer.ClearState();
         }
 
         internal static IntPtr RegisterTexture(Texture texture)
