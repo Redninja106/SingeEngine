@@ -24,10 +24,10 @@ namespace Singe.Rendering
         }
 
         private protected abstract GraphicsInformation GetInfo();
-        public abstract Mesh<T> CreateMesh<T>(T[] vertices) where T : unmanaged;
+        public abstract Mesh<T> CreateMesh<T>(T[] vertices, int[] indices) where T : unmanaged;
         public abstract Material CreateMaterial();
-        public abstract VertexShader CreateVertexShader(string source);
-        public abstract PixelShader CreatePixelShader(string source);
+        public abstract IVertexShader CreateVertexShader(string source);
+        public abstract IPixelShader CreatePixelShader(string source);
         public abstract Texture CreateTexture<T>(int width, int height, DataFormat format, T[] data) where T : unmanaged;
 
         public abstract void Clear(Color color);
@@ -55,10 +55,5 @@ namespace Singe.Rendering
 
         public abstract void ClearState();
         public abstract void Dispose();
-
-        public Mesh<T> CreateMesh<T>(int size) where T : unmanaged
-        {
-            return CreateMesh(new T[size]);
-        }
     }
 }

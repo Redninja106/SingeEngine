@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Singe.Rendering.Implementations.Direct3D11.Materials;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
@@ -13,6 +14,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
         D3D11Texture currentRenderTarget;
         D3D11Material currentMaterial;
         IRenderingOutput output;
+
         public D3D11Renderer() : base(GraphicsApi.Direct3D11)
         {
             D3D11.D3D11CreateDevice(IntPtr.Zero, Vortice.Direct3D.DriverType.Hardware, DeviceCreationFlags.BgraSupport, null, out device, out immediateContext);
@@ -25,17 +27,17 @@ namespace Singe.Rendering.Implementations.Direct3D11
 
         public override Material CreateMaterial()
         {
-            throw new NotImplementedException();
+            return new D3D11Material(this, new D3D11VertexShaderStage(this), new D3D11PixelShaderStage(this));
         }
 
-        public override Mesh<T> CreateMesh<T>(T[] vertices)
+        public override Mesh<T> CreateMesh<T>(T[] vertices, int[] indices)
         {
-            throw new NotImplementedException();
+            return new D3D11Mesh<T>(this, vertices, indices);
         }
 
-        public override PixelShader CreatePixelShader(string source)
+        public override IPixelShader CreatePixelShader(string source)
         {
-            throw new NotImplementedException();
+            return new D3D11PixelShader(this, source);
         }
 
         public override Texture CreateTexture<T>(int width, int height, DataFormat format, T[] data)
@@ -45,7 +47,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
             return tex;
         }
 
-        public override VertexShader CreateVertexShader(string source)
+        public override IVertexShader CreateVertexShader(string source)
         {
             return new D3D11VertexShader(this, source);
         }
@@ -59,7 +61,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
         public override unsafe void DrawMesh<T>(Mesh<T> mesh)
         {
             var d3d11Mesh = (D3D11Mesh<T>)mesh;
-            immediateContext.IASetVertexBuffers(0, new VertexBufferView(d3d11Mesh.VertexBuffer, sizeof(T)));
+            d3d11Mesh.Draw();
         }
 
         public ID3D11Device GetDevice()
@@ -75,6 +77,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
         public override void SetMaterial(Material material)
         {
             this.currentMaterial = (D3D11Material)material;
+            this.currentMaterial.Apply();
         }
 
         public override void SetRenderTarget(Texture texture)

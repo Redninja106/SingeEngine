@@ -73,10 +73,12 @@ namespace Singe
                 
                 Gui.Update();
 
+                Gui.Begin();
+
                 Service.CallKeyCommandBindings();
 
-                if(IsConsoleOpen)
-                if(ImGui.Begin("Console", ref IsConsoleOpen))
+                //if(IsConsoleOpen)
+                if(ImGui.Begin("Console"))
                 {
                     if(ImGui.BeginChild("scrolling"))
                     {
@@ -97,9 +99,10 @@ namespace Singe
 
                 Renderer.SetRenderTarget(Output.GetRenderTarget());
                 Renderer.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
-                
+
                 // update game
 
+                Gui.End();
                 GuiRenderer.Render();
 
 

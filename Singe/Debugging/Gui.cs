@@ -32,8 +32,16 @@ namespace Singe.Debugging
             {
                 io.AddInputCharacter(c);
             }
+        }
 
+        internal static void Begin()
+        {
             ImGui.NewFrame();
+        }
+
+        internal static void End()
+        {
+            ImGui.EndFrame();
         }
     }
 }

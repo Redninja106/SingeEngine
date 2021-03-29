@@ -43,7 +43,8 @@ namespace Singe.Rendering.Implementations.Direct3D11
         {
             if (renderTargetView == null)
             {
-                renderTargetView = d3d11Texture.Device.CreateRenderTargetView(d3d11Texture, new RenderTargetViewDescription(d3d11Texture, RenderTargetViewDimension.Texture2D));
+                var rtv = renderer.GetDevice().CreateRenderTargetView(d3d11Texture, new RenderTargetViewDescription(d3d11Texture, RenderTargetViewDimension.Texture2D));
+                renderTargetView = rtv;
             }
 
             return renderTargetView;
@@ -53,7 +54,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
         {
             if (samplerState == null)
             {
-                samplerState = d3d11Texture.Device.CreateSamplerState(new SamplerDescription(Filter.Anisotropic, TextureAddressMode.Wrap, TextureAddressMode.Wrap, TextureAddressMode.Wrap));
+                samplerState = renderer.GetDevice().CreateSamplerState(new SamplerDescription(Filter.Anisotropic, TextureAddressMode.Wrap, TextureAddressMode.Wrap, TextureAddressMode.Wrap));
             }
 
             return samplerState;
@@ -63,7 +64,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
         {
             if (shaderResourceView == null)
             {
-                shaderResourceView = d3d11Texture.Device.CreateShaderResourceView(d3d11Texture, new ShaderResourceViewDescription(d3d11Texture, Vortice.Direct3D.ShaderResourceViewDimension.Texture2D, d3d11Texture.Description.Format));
+                shaderResourceView = renderer.GetDevice().CreateShaderResourceView(d3d11Texture, new ShaderResourceViewDescription(d3d11Texture, Vortice.Direct3D.ShaderResourceViewDimension.Texture2D, d3d11Texture.Description.Format));
             }
 
             return shaderResourceView;

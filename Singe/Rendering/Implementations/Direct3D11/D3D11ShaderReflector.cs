@@ -8,7 +8,7 @@ using Vortice.DXGI;
 
 namespace Singe.Rendering.Implementations.Direct3D11
 {
-    class D3D11ShaderReflector : ShaderReflection
+    class D3D11ShaderReflector : ShaderReflection, IDisposable
     {
         ID3D11ShaderReflection reflection;
         public D3D11ShaderReflector(ID3D11ShaderReflection reflection)
@@ -82,6 +82,11 @@ namespace Singe.Rendering.Implementations.Direct3D11
             }
 
             return result;
+        }
+
+        public void Dispose()
+        {
+            reflection.Dispose();
         }
     }
 }

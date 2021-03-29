@@ -4,20 +4,44 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public sealed class MaterialShaderStage<T> where T : Shader
+    public abstract class MaterialShaderStage<T> where T : IShader
     {
         public T Shader { get; private set; }
-        public Texture[] Textures { get; private set; }
-        public ValueType[] ConstantBuffers { get; private set; }
+        private protected Texture[] Textures { get; private set; }
+        private protected ValueType[] ConstantBuffers { get; private set; }
 
-        public MaterialShaderStage(T shader)
+        internal abstract void Apply();
+
+
+        internal MaterialShaderStage(Renderer renderer)
         {
-            this.Shader = shader;
+            Textures = new Texture[renderer.Info.MaxTextureCount];
+            ConstantBuffers = new ValueType[renderer.Info.MaxConstantBufferCount];
         }
 
         public void Set(T shader)
         {
             this.Shader = shader;
+        }
+
+        public virtual void SetConstantBuffer<TType>(int index, TType value) where TType : unmanaged
+        {
+            ConstantBuffers[index] = value;
+        }
+
+        public virtual TType GetConstantBuffer<TType>(int index) where TType : unmanaged
+        {
+            return (TType)ConstantBuffers[index];
+        }
+
+        public virtual void SetTexture(int index, Texture value)
+        {
+            Textures[index] = value;
+        }
+
+        public virtual Texture GetTexture(int index)
+        {
+            return Textures[index];
         }
     }
 }

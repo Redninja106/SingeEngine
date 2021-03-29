@@ -36,7 +36,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
             var size = hwndManager.GetSize();
             swapchain = factory.CreateSwapChainForHwnd(device, HwndManager.GetHwnd(), new SwapChainDescription1(size.Width, size.Height));
 
-            using var t = swapchain.GetBuffer<ID3D11Texture2D>(0);
+            var t = swapchain.GetBuffer<ID3D11Texture2D>(0);
             rt = new D3D11Texture(renderer, t);
         }
 

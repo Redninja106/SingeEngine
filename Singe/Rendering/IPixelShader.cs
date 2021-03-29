@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public abstract class PixelShader : Shader
+    public interface IPixelShader : IShader
     {
 
     }

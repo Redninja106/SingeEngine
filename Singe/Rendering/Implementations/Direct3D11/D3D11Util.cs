@@ -6,7 +6,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
 {
     internal static class D3D11Util
     {
-        public static D3D11VertexShader GetAsD3D11(this VertexShader shader)
+        public static D3D11VertexShader GetAsD3D11(this IVertexShader shader)
         {
             return (D3D11VertexShader)shader;
         }

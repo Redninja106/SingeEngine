@@ -4,8 +4,8 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public abstract class Shader
+    public interface IVertexShader : IShader
     {
-        public abstract ShaderReflection GetShaderReflection();
+        bool CheckValidVertex<T>() where T : unmanaged;
     }
 }
