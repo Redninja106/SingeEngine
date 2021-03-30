@@ -37,7 +37,7 @@ namespace Singe
             
             var factoryApis = WindowManager.GetSupportedApis();
 
-            if (!factoryApis.Contains(Renderer.GetApi()))
+            if (!factoryApis.Contains(Renderer.Api))
                 throw new Exception("Rendering output factory doesnt not support this api!");
 
             Output = WindowManager.CreateOutput(Renderer);
@@ -66,8 +66,8 @@ namespace Singe
                 // - present
 
                 Time.Update();
-                WindowManager.HandleEvents();
                 Input.Update();
+                WindowManager.HandleEvents();
 
                 // update input
                 
@@ -77,8 +77,9 @@ namespace Singe
 
                 Service.CallKeyCommandBindings();
 
-                //if(IsConsoleOpen)
-                if(ImGui.Begin("Console"))
+                ImGui.ShowDemoWindow();
+                if(IsConsoleOpen)
+                if(ImGui.Begin("Console", ref IsConsoleOpen))
                 {
                     if(ImGui.BeginChild("scrolling"))
                     {

@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using Vortice.Direct3D11;
+using Vortice.DXGI;
 
 namespace Singe.Rendering.Implementations.Direct3D11
 {
@@ -13,24 +14,40 @@ namespace Singe.Rendering.Implementations.Direct3D11
         ID3D11SamplerState samplerState;
         ID3D11ShaderResourceView shaderResourceView;
 
+        public override int Width => this.width;
+        public override int Height => this.height;
+        public override int BytesPerPixel => this.bbp;
 
+        private int width;
+        private int height;
+        private int bbp;
 
-        public D3D11Texture(D3D11Renderer renderer, int width, int height, DataFormat format)
+        public D3D11Texture(D3D11Renderer renderer, int width, int height, DataFormat format) : this(renderer, renderer.GetDevice().CreateTexture2D(new Texture2DDescription(format.ToD3D11(), width, height,1,0,BindFlags.RenderTarget | BindFlags.ShaderResource)))
         {
-            this.renderer = renderer;
-            this.d3d11Texture = renderer.GetDevice().CreateTexture2D(new Texture2DDescription(format.ToD3D11(), width, height));
         }
 
         public D3D11Texture(D3D11Renderer renderer, ID3D11Texture2D texture)
         {
-            this.renderer = renderer;   
-            this.d3d11Texture = texture;
+            this.renderer = renderer;
+            SetInternalTexture(texture);
         }
 
         public void SetInternalTexture(ID3D11Texture2D tex)
         {
-            d3d11Texture.Dispose();
+            if (d3d11Texture != null)
+            {
+                d3d11Texture?.Dispose();
+                d3d11Texture = null;
+            }
+
+            Reset();
+
+            shaderResourceView?.Dispose();
             d3d11Texture = tex;
+            if (tex == null) return;
+            this.width = tex.Description.Width;
+            this.height = tex.Description.Height;
+            this.bbp = tex.Description.Format.SizeOfInBytes();
         }
 
         public override void Dispose()
@@ -73,13 +90,18 @@ namespace Singe.Rendering.Implementations.Direct3D11
         public void Reset()
         {
             renderTargetView?.Dispose();
+            renderTargetView = null;
+
             shaderResourceView?.Dispose();
+            shaderResourceView = null;
+
             samplerState?.Dispose();
+            samplerState = null;
         }
 
         public override void SetData<T>(T[] data)
         {
-            renderer.GetContext().UpdateSubresource(data, d3d11Texture);
+            renderer.GetContext().UpdateSubresource(data, d3d11Texture, 0, d3d11Texture.Description.Format.SizeOfInBytes() * this.d3d11Texture.Description.Width, 0);
         }
     }
 }

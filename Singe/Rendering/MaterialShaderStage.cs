@@ -4,44 +4,32 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public abstract class MaterialShaderStage<T> where T : IShader
+    public abstract class MaterialShaderStage<T> : IDisposable where T : IShader
     {
-        public T Shader { get; private set; }
-        private protected Texture[] Textures { get; private set; }
-        private protected ValueType[] ConstantBuffers { get; private set; }
+        internal Material Material { get; private set; }
+
+        public MaterialShaderStage()
+        {
+
+        }
+
+        internal void SetMaterial(Material material)
+        {
+            this.Material = material;
+        }
 
         internal abstract void Apply();
+        internal abstract void Remove();
 
+        public abstract void SetTexture(int index, Texture texture);
+        public abstract Texture GetTexture(int index);
+        
+        public abstract void SetConstantBuffer<TData>(int index, TData data) where TData : unmanaged;
+        public abstract TData GetConstantBuffer<TData>(int index) where TData : unmanaged;
 
-        internal MaterialShaderStage(Renderer renderer)
-        {
-            Textures = new Texture[renderer.Info.MaxTextureCount];
-            ConstantBuffers = new ValueType[renderer.Info.MaxConstantBufferCount];
-        }
+        public abstract void Set(T shader);
+        public abstract T GetShader();
 
-        public void Set(T shader)
-        {
-            this.Shader = shader;
-        }
-
-        public virtual void SetConstantBuffer<TType>(int index, TType value) where TType : unmanaged
-        {
-            ConstantBuffers[index] = value;
-        }
-
-        public virtual TType GetConstantBuffer<TType>(int index) where TType : unmanaged
-        {
-            return (TType)ConstantBuffers[index];
-        }
-
-        public virtual void SetTexture(int index, Texture value)
-        {
-            Textures[index] = value;
-        }
-
-        public virtual Texture GetTexture(int index)
-        {
-            return Textures[index];
-        }
+        public abstract void Dispose();
     }
 }

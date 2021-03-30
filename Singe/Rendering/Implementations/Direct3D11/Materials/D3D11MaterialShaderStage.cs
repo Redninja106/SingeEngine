@@ -5,56 +5,77 @@ using Vortice.Direct3D11;
 
 namespace Singe.Rendering.Implementations.Direct3D11.Materials
 {
-    public abstract class D3D11MaterialShaderStage<T> : MaterialShaderStage<T> where T : IShader
+    internal abstract class D3D11MaterialShaderStage<T> : MaterialShaderStage<T> where T : IShader
     {
-        D3D11Renderer renderer;
-        ID3D11Buffer[] d3d11ConstantBuffers;
-        ID3D11SamplerState[] samplers;
+        protected D3D11Renderer renderer;
 
-        internal D3D11MaterialShaderStage(D3D11Renderer renderer) : base(renderer)
+        protected ID3D11Buffer[] constantBuffers;
+        ValueType[] constantBuffersData;
+
+        protected ID3D11SamplerState[] samplers;
+        protected ID3D11ShaderResourceView[] resourceViews;
+        D3D11Texture[] textures;
+
+        T shader;
+
+        internal D3D11MaterialShaderStage(D3D11Renderer renderer)
         {
             this.renderer = renderer;
         }
 
-        public ID3D11Buffer[] GetConstantBuffers()
-        {
-            return d3d11ConstantBuffers;
-        }
-
-        public ID3D11SamplerState[] GetSamplers()
-        {
-            List<ID3D11SamplerState> samplers = new List<ID3D11SamplerState>();
-
-            foreach (var t in this.Textures)
-            {
-                samplers.Add((t as D3D11Texture).GetSampler());
-            }
-
-            return samplers.ToArray();
-        }
-
-        public ID3D11ShaderResourceView[] GetShaderResourceViews()
-        {
-            throw new NotImplementedException();
-        }
-
-
         public override unsafe void SetConstantBuffer<TType>(int index, TType value)
         {
-            if (d3d11ConstantBuffers == null)
-                d3d11ConstantBuffers = new ID3D11Buffer[ConstantBuffers.Length];
-
-            if (d3d11ConstantBuffers[index] != null && d3d11ConstantBuffers[index].Description.SizeInBytes == sizeof(TType))
+            if (constantBuffers == null)
             {
-                UpdateConstantBuffer(d3d11ConstantBuffers[index], value);
+                constantBuffers =  new ID3D11Buffer[renderer.Info.MaxConstantBufferCount];
+                constantBuffersData = new ValueType[renderer.Info.MaxConstantBufferCount];
+            }
+
+            if (constantBuffers[index] != null && constantBuffers[index].Description.SizeInBytes == sizeof(TType))
+            {
+                UpdateConstantBuffer(constantBuffers[index], value);
             }
             else
             {
-                d3d11ConstantBuffers[index] = CreateConstantBuffer(value);
+                constantBuffers[index]?.Dispose();
+                constantBuffers[index] = CreateConstantBuffer(value);
             }
 
+            constantBuffersData[index] = value;
+        }
 
-            base.SetConstantBuffer(index, value);
+        public override TData GetConstantBuffer<TData>(int index)
+        {
+            return (TData)constantBuffersData[index];
+        }
+
+        public override void SetTexture(int index, Texture value)
+        {
+            if (samplers == null)
+            {
+                samplers = new ID3D11SamplerState[renderer.Info.MaxTextureCount];
+                textures = new D3D11Texture[renderer.Info.MaxTextureCount];
+                resourceViews = new ID3D11ShaderResourceView[renderer.Info.MaxTextureCount];
+            }
+
+            textures[index] = (D3D11Texture)value;
+            samplers[index] = textures[index].GetSampler();
+            resourceViews[index] = textures[index].GetShaderResourceView();
+        }
+
+        public override Texture GetTexture(int index)
+        {
+            return textures[index];
+        }
+
+        public override void Set(T shader)
+        {
+            this.shader = shader;
+        }
+
+        public override T GetShader()
+        {
+            return this.shader;
         }
 
         private unsafe ID3D11Buffer CreateConstantBuffer<TType>(TType initialValue) where TType : unmanaged
@@ -64,7 +85,15 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
         private void UpdateConstantBuffer<TType>(ID3D11Buffer buffer, TType value) where TType : unmanaged
         {
+            renderer.GetContext().UpdateSubresource(ref value, buffer);
+        }
 
+        public override void Dispose()
+        {
+            foreach (var buffer in constantBuffers)
+            {
+                buffer?.Dispose();
+            }
         }
     }
 }

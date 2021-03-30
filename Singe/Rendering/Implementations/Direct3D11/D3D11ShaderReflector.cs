@@ -55,11 +55,11 @@ namespace Singe.Rendering.Implementations.Direct3D11
                 Format format;
                 string formatString = "";
                 int bbp = 32;
-
+                
                 if ((int)p.UsageMask > 0) formatString += "R" + bbp;
                 if ((int)p.UsageMask > 1) formatString += "G" + bbp;
-                if ((int)p.UsageMask > 2) formatString += "B" + bbp;
-                if ((int)p.UsageMask > 4) formatString += "A" + bbp;
+                if ((int)p.UsageMask > 3) formatString += "B" + bbp;
+                if ((int)p.UsageMask > 7) formatString += "A" + bbp;
 
                 switch (p.ComponentType)
                 {

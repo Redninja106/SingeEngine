@@ -3,39 +3,47 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Text;
+using Vortice.Direct3D11;
 
 namespace Singe.Rendering
 {
     public abstract class Renderer : IDisposable
     {
-        public GraphicsInformation Info { get; }
-
-        private readonly GraphicsApi api;
-
         public Renderer(GraphicsApi api)
         {
-            this.api = api;
+            this.Api = api;
             this.Info = GetInfo();
         }
 
-        public GraphicsApi GetApi()
-        {
-            return api;
-        }
+        public GraphicsInformation Info { get; }
+        public GraphicsApi Api { get; }
 
         private protected abstract GraphicsInformation GetInfo();
-        public abstract Mesh<T> CreateMesh<T>(T[] vertices, int[] indices) where T : unmanaged;
+        internal abstract void SetRenderingOutput(IRenderingOutput output);
+
+        public abstract void Clear(Color color);
+        
+        public abstract Texture GetWindowRenderTarget();
+        
+        public abstract void SetMaterial(Material material);
+        public abstract void DrawMesh(Mesh mesh);
+        
+        // RS
+        public abstract void SetClippingRectangles(Rectangle[] rects);
+        public abstract void SetViewport(float x, float y, float w, float h);
+
+        // OM
+        public abstract void SetRenderTarget(Texture texture);
+        public abstract void SetDepthStencilRenderTarget();
+
+        public abstract void ClearState();
+        public abstract void Dispose();
+
+        public abstract Mesh CreateMesh<T>(T[] vertices, uint[] indices) where T : unmanaged;
         public abstract Material CreateMaterial();
         public abstract IVertexShader CreateVertexShader(string source);
         public abstract IPixelShader CreatePixelShader(string source);
         public abstract Texture CreateTexture<T>(int width, int height, DataFormat format, T[] data) where T : unmanaged;
-
-        public abstract void Clear(Color color);
-        public abstract void SetRenderTarget(Texture texture);
-        public abstract void SetMaterial(Material material);
-        public abstract void DrawMesh<T>(Mesh<T> mesh) where T : unmanaged;
-
-        public abstract void SetClippingRectangles(Rectangle[] rects);
 
         public static Renderer Create(GraphicsApi api)
         {
@@ -50,10 +58,5 @@ namespace Singe.Rendering
                     throw new NotImplementedException();
             }
         }
-
-        internal abstract void SetRenderingOutput(IRenderingOutput output);
-
-        public abstract void ClearState();
-        public abstract void Dispose();
     }
 }

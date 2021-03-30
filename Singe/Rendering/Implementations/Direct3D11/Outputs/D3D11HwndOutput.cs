@@ -53,7 +53,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
 
         public void CreateRenderTarget()
         {
-            using var t = swapchain.GetBuffer<ID3D11Texture2D>(0);
+            var t = swapchain.GetBuffer<ID3D11Texture2D>(0);
             rt.SetInternalTexture(t);
         }
 

@@ -411,7 +411,7 @@ namespace Singe.Platforms.Implementations.Windows
 
         public override IRenderingOutput CreateOutput(Renderer renderer)
         {
-            switch(renderer.GetApi())
+            switch(renderer.Api)
             {
                 case GraphicsApi.Direct3D11:
                     return new D3D11HwndOutput((D3D11Renderer)renderer, this);

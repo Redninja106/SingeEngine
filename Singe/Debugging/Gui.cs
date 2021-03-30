@@ -32,6 +32,9 @@ namespace Singe.Debugging
             {
                 io.AddInputCharacter(c);
             }
+
+            var cursor = ImGui.GetMouseCursor();
+            
         }
 
         internal static void Begin()
