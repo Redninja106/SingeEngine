@@ -3,6 +3,7 @@ using Singe.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Net.NetworkInformation;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
@@ -13,6 +14,8 @@ namespace Singe.Debugging
 {
     public static class Gui
     {
+        static Dictionary<IntPtr, Texture> textures = new Dictionary<IntPtr, Texture>();
+        static int nextTexId;
         internal static void Update()
         {
             var io = ImGui.GetIO();
@@ -45,6 +48,17 @@ namespace Singe.Debugging
         internal static void End()
         {
             ImGui.EndFrame();
+        }
+
+        internal static IntPtr NewTextureId(Texture texture)
+        {
+            var id = new IntPtr(++nextTexId);
+            textures.Add(id, texture);
+            return id;
+        }
+        internal static void DestroyTextureId(IntPtr id)
+        {
+            textures.Remove(id);
         }
     }
 }

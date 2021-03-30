@@ -46,6 +46,12 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
         public override TData GetConstantBuffer<TData>(int index)
         {
+            if (constantBuffers == null)
+            {
+                constantBuffers = new ID3D11Buffer[renderer.Info.MaxConstantBufferCount];
+                constantBuffersData = new ValueType[renderer.Info.MaxConstantBufferCount];
+            }
+
             return (TData)constantBuffersData[index];
         }
 
@@ -65,6 +71,13 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
         public override Texture GetTexture(int index)
         {
+            if (samplers == null)
+            {
+                samplers = new ID3D11SamplerState[renderer.Info.MaxTextureCount];
+                textures = new D3D11Texture[renderer.Info.MaxTextureCount];
+                resourceViews = new ID3D11ShaderResourceView[renderer.Info.MaxTextureCount];
+            }
+
             return textures[index];
         }
 

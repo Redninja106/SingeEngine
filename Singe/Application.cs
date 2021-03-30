@@ -1,5 +1,6 @@
 ﻿using ImGuiNET;
 using Singe.Debugging;
+using Singe.Debugging.Windows;
 using Singe.Platforms;
 using Singe.Rendering;
 using Singe.Services;
@@ -20,14 +21,6 @@ namespace Singe
 
         public static bool IsRunning { get; private set; } = true;
 
-        public static bool IsConsoleOpen;
-
-        [Command("application")]
-        public static void ToggleConsole()
-        {
-            IsConsoleOpen = !IsConsoleOpen;
-        }
-
         [Command]
         public static void Run()
         {
@@ -47,8 +40,6 @@ namespace Singe
             Input.SetDevice(WindowManager.CreateInputDevice());
 
             GuiRenderer.Initialize(Renderer);
-
-            Service.BindCommandToKey(Key.F1, "Application:ToggleConsole");
 
             // init everything
             while (IsRunning)
@@ -77,29 +68,13 @@ namespace Singe
 
                 Service.CallKeyCommandBindings();
 
-                ImGui.ShowDemoWindow();
-                if(IsConsoleOpen)
-                if(ImGui.Begin("Console", ref IsConsoleOpen))
-                {
-                    if(ImGui.BeginChild("scrolling"))
-                    {
-                        for (int i = 0; i < 50; i++)
-                            ImGui.Text("console text");
-                    }
-
-                    string text = "";
-
-                    if (ImGui.InputText("> ", ref text, 128, ImGuiInputTextFlags.EnterReturnsTrue))
-                    {
-                        Service.SubmitCommandString(text);
-                    }
-
-                    ImGui.End();
-                }
+                
                 // render game
 
                 Renderer.SetRenderTarget(Output.GetRenderTarget());
                 Renderer.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
+                
+                GuiWindow.OnGui();
 
                 // update game
 
