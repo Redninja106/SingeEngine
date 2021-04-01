@@ -82,10 +82,10 @@ namespace Singe
                 Gui.Begin();
 
                 Input.CallKeyCommandBindings();
-                
+
                 // render game
 
-                Scene.World.Render()
+                Scene.Render();
 
                 Renderer.SetRenderTarget(Output.GetRenderTarget());
                 Renderer.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
@@ -93,7 +93,7 @@ namespace Singe
                 Dispatcher.BroadcastMessage(MessageType.OnGui, null);
 
                 // update game
-                Scene.World.Update();
+                Scene.Update();
 
                 Gui.End();
                 GuiRenderer.Render();

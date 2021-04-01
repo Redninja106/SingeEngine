@@ -12,5 +12,15 @@ namespace Singe
         {
             
         }
+
+        internal void Render()
+        {
+            throw new NotImplementedException();
+        }
+
+        internal void Update()
+        {
+            throw new NotImplementedException();
+        }
     }
 }
