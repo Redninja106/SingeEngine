@@ -1,4 +1,6 @@
-﻿using ImGuiNET;
+﻿using Commander;
+using ImGuiNET;
+using Singe.Messaging;
 using Singe.Rendering;
 using System;
 using System.Collections.Generic;
@@ -7,24 +9,36 @@ using System.Text;
 
 namespace Singe.Debugging.Windows
 {
-    [GuiWindow]
-    class MaterialViewer
+    [MessageListener]
+    internal static class MaterialViewer
     {
+        static bool open;
         static Material selectedMaterial => Material.materials[materialNames[selectedMaterialIndex]];
         static string[] materialNames;
         static int selectedMaterialIndex;
         static bool psHeaderOpen;
-        static bool gsHeaderOpen;
+        //static bool gsHeaderOpen;
         static bool vsHeaderOpen;
+
+        [Command]
+        public static void ToggleMaterialViewer()
+        {
+            open = !open;
+        }
 
         public static void OnGui()
         {
-            materialNames = Material.materials.Keys.ToArray();
-            ImGui.ListBox("Materials", ref selectedMaterialIndex, Material.materials.Keys.ToArray(), Material.materials.Count, 5);
+            if(open)
+            if (ImGui.Begin("Material Viewer", ref open))
+            {
+                materialNames = Material.materials.Keys.ToArray();
+                ImGui.Text("Materials:");
+                ImGui.ListBox("", ref selectedMaterialIndex, Material.materials.Keys.ToArray(), Material.materials.Count, 5);
 
-            DrawShaderStage("Vertex Shader", ref vsHeaderOpen, selectedMaterial.VertexShader);
-            //DrawShaderStage("Geometry Shader", ref gsHeaderOpen);
-            DrawShaderStage("Pixel Shader", ref psHeaderOpen, selectedMaterial.PixelShader);
+                DrawShaderStage("Vertex Shader", ref vsHeaderOpen, selectedMaterial.VertexShader);
+                //DrawShaderStage("Geometry Shader", ref gsHeaderOpen);
+                DrawShaderStage("Pixel Shader", ref psHeaderOpen, selectedMaterial.PixelShader);
+            }
         }
 
         private static void DrawShaderStage<T>(string name, ref bool open, MaterialShaderStage<T> stage) where T : IShader
@@ -36,6 +50,8 @@ namespace Singe.Debugging.Windows
                     for (int i = 0; i < Application.Renderer.Info.MaxConstantBufferCount; i++)
                     {
                     }
+
+                    ImGui.TreePop();
                 }
 
                 if(ImGui.TreeNode("Textures"))
@@ -46,10 +62,11 @@ namespace Singe.Debugging.Windows
                         if (t == null) break;
                         ImGui.Image(t.GetGuiTextureID(), new System.Numerics.Vector2(100, 100));
                     }
-                }
 
-                
-                ImGui.Text(name);
+                    ImGui.TreePop();
+                }
+                ImGui.TreePop();
+
             }
         }
     }

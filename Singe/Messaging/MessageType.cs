@@ -2,12 +2,12 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Singe
+namespace Singe.Messaging
 {
-    internal enum MessageType
+    public enum MessageType
     {
-        OnRender,
-        OnUpdate,
+        Init,
+        Destroy,
         OnGui,
     }
 }

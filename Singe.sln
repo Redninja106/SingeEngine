@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Singe.Editor", "Singe.Edito
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SingeTestGame", "SingeTestGame\SingeTestGame.csproj", "{E972E474-07E5-4D1A-9F7F-7043C90583DE}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Commander", "..\Commander\Commander\Commander.csproj", "{D70EF237-6FD5-4F1A-A716-B4E19E82A904}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{E972E474-07E5-4D1A-9F7F-7043C90583DE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E972E474-07E5-4D1A-9F7F-7043C90583DE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E972E474-07E5-4D1A-9F7F-7043C90583DE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D70EF237-6FD5-4F1A-A716-B4E19E82A904}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D70EF237-6FD5-4F1A-A716-B4E19E82A904}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D70EF237-6FD5-4F1A-A716-B4E19E82A904}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D70EF237-6FD5-4F1A-A716-B4E19E82A904}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

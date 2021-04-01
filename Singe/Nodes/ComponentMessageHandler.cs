@@ -6,16 +6,18 @@ using System.Text;
 
 namespace Singe
 {
-    delegate void Start();
+    delegate void Init();
     delegate void Update(float dt);
+    delegate void Destroy();
 
     internal sealed class ComponentMessageHandler
     {
         public Type ComponentType { get; }
         public Component Component { get; }
 
-        public Start Start { get; }
+        public Init Init { get; }
         public Update Update { get; }
+        public Destroy Destroy { get; }
 
         public ComponentMessageHandler(Component component)
         {
@@ -23,9 +25,10 @@ namespace Singe
 
             ComponentType = component.GetType();
 
-            Start = CreateDelegateForMethod<Start>();
+            Init = CreateDelegateForMethod<Init>();
             Update = CreateDelegateForMethod<Update>();
-            
+            Destroy = CreateDelegateForMethod<Destroy>();
+
         }
 
 

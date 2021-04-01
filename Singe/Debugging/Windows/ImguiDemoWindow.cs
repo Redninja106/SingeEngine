@@ -1,16 +1,19 @@
 ﻿using ImGuiNET;
+using Singe.Messaging;
 using System;
 using System.Collections.Generic;
 using System.Text;
 
 namespace Singe.Debugging.Windows
 {
-    [GuiWindow(false)]
+    [MessageListener]
     static class ImguiDemoWindow
     {
+        static bool open;
         public static void OnGui()
         {
-            ImGui.ShowDemoWindow();
+            if(open)
+                ImGui.ShowDemoWindow(ref open);
         }
     }
 }

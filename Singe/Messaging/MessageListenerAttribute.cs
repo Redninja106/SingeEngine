@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Singe
+namespace Singe.Messaging
 {
-    public sealed class MessageListener : Attribute
+    public sealed class MessageListenerAttribute : Attribute
     {
     }
 }

@@ -1,9 +1,10 @@
 ﻿using ImGuiNET;
 using Singe.Debugging;
 using Singe.Debugging.Windows;
+using Singe.Messaging;
 using Singe.Platforms;
 using Singe.Rendering;
-using Singe.Services;
+using Commander;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,10 +20,18 @@ namespace Singe
         public static WindowManager WindowManager { get; private set; }
         public static IRenderingOutput Output { get; private set; }
 
-        public static bool IsRunning { get; private set; } = true;
+        public static Dispatcher Dispatcher { get; private set; }
+        public static bool IsRunning { get; private set; } = false;
+
+        public static Scene Scene { get; private set; }
+
+        static Application()
+        {
+            Service.RegisterAssembly(typeof(Application).Assembly);
+        }
 
         [Command]
-        public static void Run()
+        public static Scene Run()
         {
             Renderer = Renderer.Create(GraphicsApi.Direct3D11);
 
@@ -39,7 +48,13 @@ namespace Singe
 
             Input.SetDevice(WindowManager.CreateInputDevice());
 
+            Dispatcher = new Dispatcher();
+
+            Dispatcher.BroadcastMessage(MessageType.Init, null);
+
             GuiRenderer.Initialize(Renderer);
+
+            IsRunning = true;
 
             // init everything
             while (IsRunning)
@@ -66,23 +81,25 @@ namespace Singe
 
                 Gui.Begin();
 
-                Service.CallKeyCommandBindings();
-
+                Input.CallKeyCommandBindings();
                 
                 // render game
 
+                Scene.World.Render()
+
                 Renderer.SetRenderTarget(Output.GetRenderTarget());
                 Renderer.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
-                
-                GuiWindow.OnGui();
+
+                Dispatcher.BroadcastMessage(MessageType.OnGui, null);
 
                 // update game
+                Scene.World.Update();
 
                 Gui.End();
                 GuiRenderer.Render();
 
 
-                Output.Present(0);
+                Output.Present(1);
             }
 
             Exit(0);
@@ -95,6 +112,7 @@ namespace Singe
             Renderer.Dispose();
             WindowManager.Dispose();
             Output.Dispose();
+            Dispatcher.BroadcastMessage(MessageType.Destroy, null);
             Environment.Exit(code);
         }
     }

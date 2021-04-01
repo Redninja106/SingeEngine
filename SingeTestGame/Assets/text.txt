@@ -1,0 +1,1 @@
+﻿hello world, this text is from an embedded resource!

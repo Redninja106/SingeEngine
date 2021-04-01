@@ -4,17 +4,13 @@ using System.Text;
 
 namespace Singe
 {
-    class Scene
+    public sealed class Scene
     {
-        
+        public World World { get; private set; }
 
-        public Scene() : this(null) { }
-
-        public Scene(SceneFile file)
+        public Scene()
         {
-            if (file == null)
-                return;
-
+            
         }
     }
 }

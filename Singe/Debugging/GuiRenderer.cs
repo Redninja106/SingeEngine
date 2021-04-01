@@ -77,8 +77,10 @@ namespace Singe.Debugging
         {
             GuiRenderer.renderer = renderer;
 
-            ImGui.CreateContext();
             ImGuiIOPtr io = ImGui.GetIO();
+
+            
+
             io.Fonts.AddFontDefault();
 
             io.Fonts.GetTexDataAsRGBA32(out byte* pixels, out int width, out int height, out int bytesPerPixel);
