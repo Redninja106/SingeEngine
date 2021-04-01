@@ -6,10 +6,10 @@ using static PInvoke.User32;
 using static PInvoke.Kernel32;
 using System.Runtime.CompilerServices;
 using Singe.Rendering;
-using Singe.Rendering.Implementations.Direct3D11.Outputs;
 using Singe.Rendering.Implementations.Direct3D11;
 using Singe.Platforms.Implementations.Windows.Util;
 using PInvoke;
+using Singe.Rendering.Implementations.Direct3D11.Outputs;
 
 namespace Singe.Platforms.Implementations.Windows
 {
@@ -411,10 +411,10 @@ namespace Singe.Platforms.Implementations.Windows
 
         public override IRenderingOutput CreateOutput(Renderer renderer)
         {
-            switch(renderer.API)
+            switch(renderer.Api)
             {
                 case GraphicsApi.Direct3D11:
-                    return new D3D11HwndOutput((ID3D11Renderer)renderer, this);
+                    return new D3D11HwndOutput((D3D11Renderer)renderer, this);
                 default:
                     throw new Exception("unsupported rendering api");
             }

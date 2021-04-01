@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Singe
 {
-    class World
+    public class World
     {
         public Node RootNode { get; private set; }
 
@@ -14,8 +15,13 @@ namespace Singe
         {
         }
 
-        private void RegisterComponentType<T>() where T : struct
+        internal void Update()
         {
+        }
+
+        internal void Render()
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -6,6 +6,9 @@ namespace Singe.Rendering
 {
     public enum PrimitiveType
     {
-        TriangleList
+        TriangleList,
+        TriangleStrip,
+        LineList,
+        LineStrip
     }
 }

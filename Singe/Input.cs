@@ -1,5 +1,5 @@
-﻿using Singe.Platforms;
-using Singe.Services;
+﻿using Commander;
+using Singe.Platforms;
 using System;
 using System.Collections.Generic;
 using System.Numerics;
@@ -12,10 +12,29 @@ namespace Singe
         private static List<Key> pressedKeys;
         private static List<Key> downKeys;
         private static List<Key> upKeys;
+        private static Dictionary<Key, List<string>> keyCommandBindings = new Dictionary<Key, List<string>>();
 
         private static List<char> typedChars;
 
         private static InputDevice inputDevice;
+
+        internal static void BindCommandToKey(Key key, string commandString)
+        {
+            if(!keyCommandBindings.ContainsKey(key))
+            {
+                keyCommandBindings.Add(key, new List<string>());
+            }
+
+            keyCommandBindings[key].Add(commandString);
+        }
+
+        internal static void UnbindCommandFromKey(Key key, string commandString)
+        {
+            if (keyCommandBindings.ContainsKey(key))
+            {
+                keyCommandBindings.Remove(key);
+            }
+        }
 
         private static Vector2 mousePosition;
 
@@ -81,6 +100,17 @@ namespace Singe
                 return;
 
             pressedKeys.Add(e.Key);
+        }
+
+        internal static void CallKeyCommandBindings()
+        {
+            foreach (var k in keyCommandBindings.Keys)
+            {
+                if(GetKeyDown(k))
+                {
+                    keyCommandBindings[k].ForEach(s => Service.SubmitCommandString(s));
+                }
+            }
         }
 
         public static Vector2 GetMousePosition()

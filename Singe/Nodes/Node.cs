@@ -1,25 +1,63 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Singe
 {
     public sealed class Node
     {
-        public bool IsRoot => Parent == null;
 
+        public bool IsRootNode { get; }
         public string Name { get; private set; }
 
         public Node Parent { get; private set; }
 
-        public List<Node> Children { get; private set; }
+        private List<Node> children;
+        private List<Component> components;
 
-        public List<Component> Components { get; private set; }
-
-        public Node()
+        public Node() : this(false)
         {
-            Children = new List<Node>();
-            Components = new List<Component>();
         }
+
+        private Node(bool isRoot)
+        {
+            this.IsRootNode = isRoot;
+            this.children = new List<Node>();
+            this.components = new List<Component>();
+        }
+
+        public void AddChild(Node childNode)
+        {
+            this.children.Add(childNode);
+            childNode.Parent = null;
+        }
+
+        internal static Node CreateRootNode()
+        {
+            return new Node(true);
+        }
+
+        public T GetComponent<T>() where T : Component
+        {
+            return (T)GetComponent(typeof(T));
+        }
+
+        public Component GetComponent(Type type)
+        {
+            return components.FirstOrDefault(c => type == c.GetType());
+        }
+
+        public T[] GetComponents<T>() where T : Component
+        {
+            return GetComponents(typeof(T)) as T[];
+            //return Array.ConvertAll(GetComponents(typeof(T)), c => (T)c);
+        }
+
+        public Component[] GetComponents(Type type)
+        {
+            return components.Where(c => type == c.GetType()).ToArray();
+        }
+
     }
 }

@@ -1,9 +1,10 @@
 ﻿using ImGuiNET;
 using Singe.Debugging;
+using Singe.Debugging.Windows;
+using Singe.Messaging;
 using Singe.Platforms;
 using Singe.Rendering;
-using Singe.Rendering.Immediate;
-using Singe.Services;
+using Commander;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -19,51 +20,26 @@ namespace Singe
         public static WindowManager WindowManager { get; private set; }
         public static IRenderingOutput Output { get; private set; }
 
-        public static bool IsRunning { get; private set; } = true;
+        public static Dispatcher Dispatcher { get; private set; }
+        public static bool IsRunning { get; private set; } = false;
 
-        public static bool IsConsoleOpen;
+        public static Scene Scene { get; private set; }
 
-        [Command("application")]
-        public static void ToggleConsole()
+        static Application()
         {
-            IsConsoleOpen = !IsConsoleOpen;
+            Service.RegisterAssembly(typeof(Application).Assembly);
         }
 
         [Command]
-        public static void Run()
+        public static Scene Run()
         {
-            Run(RenderingMode.Immediate);
-        }
-
-        public static void Run(GraphicsApi api)
-        {
-            Run(api, RenderingMode.Immediate);
-        }
-
-        public static void Run(RenderingMode mode)
-        {
-            Run(Renderer.GetBestSupportedGraphicsApi(), mode);
-        }
-
-        public static void Run(GraphicsApi api, RenderingMode mode)
-        {
-            switch (mode) 
-            {
-                case RenderingMode.Immediate:
-                    Renderer = Renderer.CreateImmediate(api);
-                    break;
-                case RenderingMode.Deferred:
-                    Renderer = Renderer.CreateDeferred(api);
-                    break;
-                default:
-                    throw new Exception("Unkown mode!");
-            }
+            Renderer = Renderer.Create(GraphicsApi.Direct3D11);
 
             WindowManager = WindowManager.Create();
             
             var factoryApis = WindowManager.GetSupportedApis();
 
-            if (!factoryApis.Contains(Renderer.API))
+            if (!factoryApis.Contains(Renderer.Api))
                 throw new Exception("Rendering output factory doesnt not support this api!");
 
             Output = WindowManager.CreateOutput(Renderer);
@@ -72,11 +48,13 @@ namespace Singe
 
             Input.SetDevice(WindowManager.CreateInputDevice());
 
-            var r = (ImmediateRenderer)Renderer;
+            Dispatcher = new Dispatcher();
 
-            GuiRenderer.Initialize(r, r);
+            Dispatcher.BroadcastMessage(MessageType.Init, null);
 
-            Service.BindCommandToKey(Key.F1, "Application:ToggleConsole");
+            GuiRenderer.Initialize(Renderer);
+
+            IsRunning = true;
 
             // init everything
             while (IsRunning)
@@ -94,44 +72,34 @@ namespace Singe
                 // - present
 
                 Time.Update();
-                WindowManager.HandleEvents();
                 Input.Update();
+                WindowManager.HandleEvents();
 
                 // update input
                 
                 Gui.Update();
 
-                Service.CallKeyCommandBindings();
+                Gui.Begin();
 
-                if(IsConsoleOpen)
-                if(ImGui.Begin("Console", ref IsConsoleOpen))
-                {
-                    if(ImGui.BeginChild("scrolling"))
-                    {
-                        for (int i = 0; i < 50; i++)
-                            ImGui.Text("console text");
-                    }
-
-                    string text = "";
-
-                    if (ImGui.InputText("> ", ref text, 128, ImGuiInputTextFlags.EnterReturnsTrue))
-                    {
-                        Service.SubmitCommandString(text);
-                    }
-
-                    ImGui.End();
-                }
+                Input.CallKeyCommandBindings();
+                
                 // render game
 
-                r.SetRenderTarget(Output.GetRenderTarget());
-                r.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
-                
-                // update game
+                Scene.World.Render()
 
+                Renderer.SetRenderTarget(Output.GetRenderTarget());
+                Renderer.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
+
+                Dispatcher.BroadcastMessage(MessageType.OnGui, null);
+
+                // update game
+                Scene.World.Update();
+
+                Gui.End();
                 GuiRenderer.Render();
 
 
-                Output.Present(0);
+                Output.Present(1);
             }
 
             Exit(0);
@@ -140,10 +108,11 @@ namespace Singe
         public static void Exit(int code)
         {
             // dispose everything
-            Gui.Uninitialize();
+            GuiRenderer.Uninitialize();
             Renderer.Dispose();
             WindowManager.Dispose();
             Output.Dispose();
+            Dispatcher.BroadcastMessage(MessageType.Destroy, null);
             Environment.Exit(code);
         }
     }

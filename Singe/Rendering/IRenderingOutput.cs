@@ -1,15 +1,14 @@
-﻿using Singe.Rendering;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace Singe
+namespace Singe.Rendering
 {
     public interface IRenderingOutput : IDisposable
     {
         GraphicsApi GetGraphicsApi();
 
-        RenderTarget GetRenderTarget();
+        Texture GetRenderTarget();
 
         /// <summary>
         /// Presents a finished frame to the output.
