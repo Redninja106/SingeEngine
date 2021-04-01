@@ -14,24 +14,21 @@ using System.Text;
 
 namespace Singe
 {
-    public static class Application
+    public abstract class Application
     {
-        public static Renderer Renderer { get; private set; }
-        public static WindowManager WindowManager { get; private set; }
-        public static IRenderingOutput Output { get; private set; }
+        public Renderer Renderer { get; private set; }
+        public WindowManager WindowManager { get; private set; }
+        public IRenderingOutput Output { get; private set; }
+        public Dispatcher Dispatcher { get; private set; }
+        public bool IsRunning { get; private set; } = false;
+        public Scene Scene { get; private set; }
 
-        public static Dispatcher Dispatcher { get; private set; }
-        public static bool IsRunning { get; private set; } = false;
-
-        public static Scene Scene { get; private set; }
-
-        static Application()
+        public Application()
         {
-            Service.RegisterAssembly(typeof(Application).Assembly);
+
         }
 
-        [Command]
-        public static Scene Run()
+        internal Scene Run()
         {
             Renderer = Renderer.Create(GraphicsApi.Direct3D11);
 
@@ -104,7 +101,10 @@ namespace Singe
 
             Exit(0);
         }
-
+        static Application()
+        {
+            Service.RegisterAssembly(typeof(Application).Assembly);
+        }
         public static void Exit(int code)
         {
             // dispose everything
