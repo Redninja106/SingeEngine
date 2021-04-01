@@ -31,7 +31,7 @@ namespace Singe
         }
 
         [Command]
-        public static Scene Run()
+        public static void Run()
         {
             Renderer = Renderer.Create(GraphicsApi.Direct3D11);
 
