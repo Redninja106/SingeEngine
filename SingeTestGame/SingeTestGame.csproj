@@ -11,13 +11,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\ps.hlsl" />
     <None Remove="Assets\test.png" />
     <None Remove="Assets\text.txt" />
+    <None Remove="Assets\vs.hlsl" />
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="Assets\ps.hlsl" />
     <EmbeddedResource Include="Assets\test.png" />
     <EmbeddedResource Include="Assets\text.txt" />
+    <EmbeddedResource Include="Assets\vs.hlsl" />
   </ItemGroup>
 
   <ItemGroup>

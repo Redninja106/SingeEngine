@@ -3,6 +3,7 @@ using Singe.Rendering;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using System.Numerics;
 using System.Text;
 
 namespace Singe.Platforms
@@ -30,7 +31,6 @@ namespace Singe.Platforms
 
         public abstract InputDevice CreateInputDevice();
 
-        public abstract IRenderingOutput CreateOutput(Renderer renderer);
         public abstract GraphicsApi[] GetSupportedApis();
 
         public abstract DisplayInformation[] GetDisplayInformation();
@@ -39,7 +39,9 @@ namespace Singe.Platforms
         public abstract event EventHandler<PositionChangedEventArgs> PositionChanged;
         public abstract event EventHandler<TitleChangedEventArgs> TitleChanged;
 
-        public abstract void Dispose();
+        public abstract void SetMousePos(Vector2 point);
 
+        public abstract void Dispose();
+        public abstract IRenderingOutput CreateOutput(Renderer renderer);
     }
 }

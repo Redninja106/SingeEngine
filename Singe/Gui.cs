@@ -11,7 +11,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using Vortice.Direct3D11;
 
-namespace Singe.Debugging
+namespace Singe
 {
     [MessageListener]
     public static class Gui
@@ -51,7 +51,7 @@ namespace Singe.Debugging
         {
             var io = ImGui.GetIO();
             io.DeltaTime = Time.DeltaTimeF;
-            io.DisplaySize = Application.WindowManager.GetSize().ToVector2();
+            io.DisplaySize = Application.Current.WindowManager.GetSize().ToVector2();
             io.MousePos = Input.GetMousePosition();
             io.MouseDown[0] = Input.GetKey(Key.LeftMouse);
             io.MouseDown[1] = Input.GetKey(Key.RightMouse);

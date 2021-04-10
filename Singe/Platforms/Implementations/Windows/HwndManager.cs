@@ -10,6 +10,7 @@ using Singe.Rendering.Implementations.Direct3D11;
 using Singe.Platforms.Implementations.Windows.Util;
 using PInvoke;
 using Singe.Rendering.Implementations.Direct3D11.Outputs;
+using System.Numerics;
 
 namespace Singe.Platforms.Implementations.Windows
 {
@@ -342,20 +343,6 @@ namespace Singe.Platforms.Implementations.Windows
                 case WindowMessage.WM_MBUTTONUP:
                     window.inputDevice.OnKeyUp(Key.MiddleMouse);
                     break;
-                case WindowMessage.WM_SYSCOMMAND:
-                    //switch ((SysCommands)(int)wParam)
-                    //{
-                    //    case SysCommands.SC_MAXIMIZE:
-                    //        WINDOWINFO info = new WINDOWINFO();
-                    //        if (GetWindowInfo(hwnd, ref info))
-                    //        {
-                    //            window.SizeChanged?.Invoke(window, new SizeChangedEventArgs(new Size(info.rcWindow.right - info.rcWindow.left, info.rcWindow.bottom - info.rcWindow.top)));
-                    //        }
-                    //        break;
-                    //    default:
-                    //        break;
-                    //}
-                    break;
                 case WindowMessage.WM_SIZE:
                     window.SizeChanged?.Invoke(window, new SizeChangedEventArgs(new Size(lUnion.low, lUnion.high)));
                     break;
@@ -364,6 +351,9 @@ namespace Singe.Platforms.Implementations.Windows
                     break;
                 case WindowMessage.WM_KEYUP:
                     window.inputDevice.OnKeyUp(VkToKey((VirtualKey)(int)wParam));
+                    break;
+                case WindowMessage.WM_CLOSE:
+                    Application.Current.Exit();
                     break;
             }
 
@@ -478,6 +468,11 @@ namespace Singe.Platforms.Implementations.Windows
         public override InputDevice CreateInputDevice()
         {
             return inputDevice;
+        }
+
+        public override void SetMousePos(Vector2 point)
+        {
+            SetCursorPos(GetPosition().X + (int)point.X, GetPosition().Y + (int)point.Y);
         }
     }
 }

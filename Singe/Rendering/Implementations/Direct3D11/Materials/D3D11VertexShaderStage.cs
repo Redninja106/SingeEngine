@@ -49,7 +49,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
             var context = this.renderer.GetContext();
 
-            if (this.Material.IsApplied)
+            if (this.Material.IsBound)
             {
                 context.VSSetSampler(index, samplers[index]);
                 context.VSSetShaderResource(index, resourceViews[index]);
@@ -62,7 +62,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
             var context = this.renderer.GetContext();
 
-            if (this.Material.IsApplied)
+            if (this.Material.IsBound)
             {
                 context.VSSetConstantBuffer(index, this.constantBuffers[index]);
             }

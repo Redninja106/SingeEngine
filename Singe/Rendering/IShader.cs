@@ -4,7 +4,7 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public interface IShader
+    public interface IShader : IGraphicsResource
     {
         ShaderReflection GetReflector();
     }

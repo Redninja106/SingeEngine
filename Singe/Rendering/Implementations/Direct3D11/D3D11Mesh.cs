@@ -7,16 +7,20 @@ using Vortice.Direct3D11;
 
 namespace Singe.Rendering.Implementations.Direct3D11
 {
-    internal sealed class D3D11Mesh : Mesh
+    internal sealed class D3D11Mesh : Mesh, IDestructableResource
     {
         internal ID3D11Buffer VertexBuffer { get; private set; }
         internal ID3D11Buffer IndexBuffer { get; private set; }
-
+        
         private PrimitiveType primitiveType;
 
-        private int vertsCount;
+        private int vertexCount;
         private int vertexSize;
-        private int indsCount;
+        private int indexCount;
+
+        private int viewIndexOffset;
+        private int viewIndexCount;
+        private int viewVertexOffset;
 
         D3D11Renderer renderer;
 
@@ -25,10 +29,10 @@ namespace Singe.Rendering.Implementations.Direct3D11
             this.renderer = renderer;
         }
 
-        public override void Dispose()
+        public void Destroy()
         {
             VertexBuffer.Dispose();
-            IndexBuffer.Dispose();
+            IndexBuffer?.Dispose();
         }
 
         internal unsafe void CreateVertexBuffer<T>(T[] verts) where T : unmanaged
@@ -39,7 +43,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
 
             VertexBuffer = renderer.GetDevice().CreateBuffer(verts, vertexBufferDesc);
 
-            vertsCount = verts.Length;
+            vertexCount = verts.Length;
             vertexSize = sizeof(T);
         }
 
@@ -51,12 +55,12 @@ namespace Singe.Rendering.Implementations.Direct3D11
 
             IndexBuffer = renderer.GetDevice().CreateBuffer(indices, indexBufferDesc);
             
-            indsCount = indices.Length;
+            indexCount = indices.Length;
         }
 
         public override void SetVertices<T>(T[] verts)
         {
-            if (verts.Length != vertsCount)
+            if (verts.Length != vertexCount)
                 CreateVertexBuffer(verts);
 
             renderer.GetContext().UpdateSubresource(verts, VertexBuffer);
@@ -64,7 +68,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
 
         public override void SetIndices(uint[] indices)
         {
-            if (indices.Length != indsCount)
+            if (indices.Length != indexCount)
                 CreateIndexBuffer(indices);
 
             renderer.GetContext().UpdateSubresource(indices, IndexBuffer);
@@ -75,25 +79,40 @@ namespace Singe.Rendering.Implementations.Direct3D11
             this.primitiveType = primitiveType;
         }
 
-        public unsafe void Draw()
+        public override void OnBind(ObjectBinder binder)
         {
             var context = renderer.GetContext();
             context.IASetVertexBuffers(0, new VertexBufferView(this.VertexBuffer, vertexSize));
-            context.IASetIndexBuffer(this.IndexBuffer, Vortice.DXGI.Format.R32_UInt, 0);
+
             context.IASetPrimitiveTopology(ConvertPrimitive(this.primitiveType));
 
-            context.DrawIndexed(this.indsCount, 0, 0);
+            if (this.IndexBuffer == null)
+            {
+                context.Draw(vertexCount, viewVertexOffset);
+            }
+            else
+            {
+                context.IASetIndexBuffer(this.IndexBuffer, Vortice.DXGI.Format.R32_UInt, 0);
+                context.DrawIndexed(this.viewIndexCount, this.viewIndexOffset, this.viewVertexOffset);
+            }
+
+            base.OnBind(binder);
         }
 
-        internal override void DrawPart(int indexCount, int indexOffset, int vertexOffset)
+        public override void SetOffsets(int indexCount, int indexOffset, int vertexOffset)
         {
-            var context = renderer.GetContext();
-            context.IASetVertexBuffers(0, new VertexBufferView(this.VertexBuffer, vertexSize));
-            context.IASetIndexBuffer(this.IndexBuffer, Vortice.DXGI.Format.R32_UInt, 0);
-            context.IASetPrimitiveTopology(ConvertPrimitive(this.primitiveType));
-
-            context.DrawIndexed(indexCount, indexOffset, vertexOffset);
+            this.viewIndexCount = indexCount;
+            this.viewIndexOffset = indexOffset;
+            this.viewVertexOffset = vertexOffset;
         }
+
+        public override void ResetOffsets()
+        {
+            this.viewIndexCount = this.indexCount;
+            this.viewIndexOffset = 0;
+            this.viewVertexOffset = 0;
+        }
+
 
         static PrimitiveTopology ConvertPrimitive(PrimitiveType type)
         {
@@ -110,6 +129,18 @@ namespace Singe.Rendering.Implementations.Direct3D11
                 default:
                     return PrimitiveTopology.Undefined;
             }
+        }
+
+        public override void SetDebugName(string name)
+        {
+            VertexBuffer.DebugName = name + " (Vertex Buffer)";
+            
+            if(IndexBuffer != null)
+            {
+                IndexBuffer.DebugName = name + " (Index Buffer)"; 
+            }
+
+            base.SetDebugName(name);
         }
     }
 }

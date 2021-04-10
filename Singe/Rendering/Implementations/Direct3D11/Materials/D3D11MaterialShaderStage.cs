@@ -93,7 +93,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
         private unsafe ID3D11Buffer CreateConstantBuffer<TType>(TType initialValue) where TType : unmanaged
         {
-            return renderer.GetDevice().CreateBuffer(ref initialValue, new BufferDescription(sizeof(TType), BindFlags.ConstantBuffer, Usage.Default, ResourceOptionFlags.None));
+            return renderer.GetDevice().CreateBuffer(ref initialValue, new BufferDescription(sizeof(TType) + (16 - (sizeof(TType) % 16)), BindFlags.ConstantBuffer, Usage.Default, ResourceOptionFlags.None));
         }
 
         private void UpdateConstantBuffer<TType>(ID3D11Buffer buffer, TType value) where TType : unmanaged
@@ -103,9 +103,12 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
         public override void Dispose()
         {
-            foreach (var buffer in constantBuffers)
+            if (constantBuffers != null)
             {
-                buffer?.Dispose();
+                foreach (var buffer in constantBuffers)
+                {
+                    buffer?.Dispose();
+                }
             }
         }
     }

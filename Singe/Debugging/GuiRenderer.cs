@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
 using System.Text;
-using Vortice.Direct3D11;
 
 namespace Singe.Debugging
 {
@@ -65,6 +64,7 @@ namespace Singe.Debugging
         static Texture fontTexture;
         static Mesh mesh;
         static Material material;
+        static CameraState cameraState;
 
         public static void Render()
         {
@@ -77,9 +77,7 @@ namespace Singe.Debugging
         {
             GuiRenderer.renderer = renderer;
 
-            ImGuiIOPtr io = ImGui.GetIO();
-
-            
+            var io = ImGui.GetIO();
 
             io.Fonts.AddFontDefault();
 
@@ -92,7 +90,7 @@ namespace Singe.Debugging
             io.Fonts.SetTexID(RegisterTexture(fontTexture));
 
             mesh = renderer.CreateMesh(new ImDrawVert[1], new uint[1]);
-            material = renderer.CreateMaterial();
+            material = renderer.CreateMaterial("ImGui Material");
 
             var vs = renderer.CreateVertexShader(vsSource);
             var ps = renderer.CreatePixelShader(psSource);
@@ -105,12 +103,20 @@ namespace Singe.Debugging
                 new VertexLayoutElement("TEXCOORD", 2, 32, VertexElementType.Float, 0),
                 new VertexLayoutElement("COLOR", 4, 8, VertexElementType.Unorm, 0),
             });
+
+            cameraState = renderer.CreateCameraState();
+
+            cameraState.SetCullMode(CullMode.None);
+            cameraState.SetFillMode(FillMode.Solid);
+            cameraState.SetStencilEnabled(false);
+            cameraState.SetDepthEnabled(false);
+            
         }
 
         public static void Uninitialize()
         {
-            mesh.Dispose();
-            material.Dispose();
+            renderer.DestroyMesh(mesh);
+            renderer.DestroyMaterial(material);
 
             ImGui.DestroyContext();
         }
@@ -159,7 +165,7 @@ namespace Singe.Debugging
 
             mesh.SetVertices(vertices);
             mesh.SetIndices(indices);
-            (renderer as D3D11Renderer).SetState();
+
             //make draw calls
             vtxOffset = 0;
             idxOffset = 0;
@@ -167,9 +173,11 @@ namespace Singe.Debugging
 
             renderer.SetMaterial(material);
 
+            renderer.SetCameraState(cameraState);
+
             renderer.SetRenderTarget(renderer.GetWindowRenderTarget());
 
-            renderer.SetViewport(0, 0, drawData.DisplaySize.X, drawData.DisplaySize.Y);
+            cameraState.SetViewport(new RectangleF(0, 0, drawData.DisplaySize.X, drawData.DisplaySize.Y), 0, 1);
 
             for (int n = 0; n < drawData.CmdListsCount; n++)
             {
@@ -188,9 +196,11 @@ namespace Singe.Debugging
                     {
                         material.PixelShader.SetTexture(0, textures[pcmd.TextureId]);
                         
-                        renderer.SetClippingRectangles(new[] { new Rectangle((int)(pcmd.ClipRect.X - drawData.DisplayPos.X), (int)(pcmd.ClipRect.Y - drawData.DisplayPos.Y), (int)(pcmd.ClipRect.Z - drawData.DisplayPos.X), (int)(pcmd.ClipRect.W - drawData.DisplayPos.Y)) });
+                        //cameraState.SetClippingRectangles(new[] { new Rectangle((int)(pcmd.ClipRect.X), (int)(pcmd.ClipRect.Y), (int)(pcmd.ClipRect.Z), (int)(pcmd.ClipRect.W)) });
 
-                        mesh.DrawPart((int)pcmd.ElemCount, idxOffset, vtxOffset);
+                        mesh.SetOffsets((int)pcmd.ElemCount, idxOffset, vtxOffset);
+
+                        renderer.DrawMesh(mesh);
                     }
                     idxOffset += (int)pcmd.ElemCount;
                 }

@@ -8,5 +8,7 @@ namespace Singe.Rendering
     {
         public int MaxConstantBufferCount { get; internal set; }
         public int MaxTextureCount { get; internal set; }
+        public int MaxTextureWidth { get; internal set; }
+        public int MaxTextureHeight { get; internal set; }
     }
 }

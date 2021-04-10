@@ -48,7 +48,7 @@ namespace Singe
             typedChars = new List<char>();
         }
 
-        internal static void Update()
+        internal static void Reset()
         {
             downKeys.Clear();
             upKeys.Clear();
@@ -118,6 +118,11 @@ namespace Singe
             return mousePosition;
         }
 
+        public static void SetMousePosition(Vector2 position)
+        {
+            inputDevice.Window.SetMousePos(position);
+        }
+
         public static bool GetKey(Key key)
         {
             return pressedKeys.Contains(key);
@@ -148,5 +153,6 @@ namespace Singe
         {
             InputDevice_CharTyped(null, new CharEventArgs(c));
         }
+
     }
 }

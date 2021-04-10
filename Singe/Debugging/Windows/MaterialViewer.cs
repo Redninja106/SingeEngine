@@ -47,7 +47,7 @@ namespace Singe.Debugging.Windows
             {
                 if(ImGui.TreeNode("Constant Buffers"))
                 {
-                    for (int i = 0; i < Application.Renderer.Info.MaxConstantBufferCount; i++)
+                    for (int i = 0; i < Application.Current.Renderer.Info.MaxConstantBufferCount; i++)
                     {
                     }
 
@@ -56,7 +56,7 @@ namespace Singe.Debugging.Windows
 
                 if(ImGui.TreeNode("Textures"))
                 {
-                    for (int i = 0; i < Application.Renderer.Info.MaxTextureCount; i++)
+                    for (int i = 0; i < Application.Current.Renderer.Info.MaxTextureCount; i++)
                     {
                         var t = stage.GetTexture(i);
                         if (t == null) break;

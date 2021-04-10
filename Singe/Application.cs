@@ -16,104 +16,156 @@ namespace Singe
 {
     public abstract class Application
     {
+        public static Application Current { get; private set; }
+
         public Renderer Renderer { get; private set; }
         public WindowManager WindowManager { get; private set; }
-        public IRenderingOutput Output { get; private set; }
         public Dispatcher Dispatcher { get; private set; }
         public bool IsRunning { get; private set; } = false;
-        public Scene Scene { get; private set; }
+
+        internal IRenderingOutput Output { get; private set; }
+
+        public abstract void OnInitialize();
+        public abstract void OnGui();
+        public abstract void OnUpdate();
+        public abstract void OnRender();
+        public abstract void OnDestroy();
+
+        private void InitializePlatform()
+        {
+            this.WindowManager = WindowManager.Create();
+            
+            Input.SetDevice(this.WindowManager.CreateInputDevice());
+        }
+
+        private void InitializeGraphics()
+        {
+            // Create the renderer
+            this.Renderer = Renderer.Create(GraphicsApi.Direct3D11);
+
+            // make sure the renderer is compatable
+            var factoryApis = this.WindowManager.GetSupportedApis();
+
+            if (!factoryApis.Contains(this.Renderer.Api))
+                throw new Exception("Rendering output factory doesnt not support this api!");
+
+            // Create the rendering output
+            Output = WindowManager.CreateOutput(Renderer);
+
+            Renderer.SetRenderingOutput(Output);
+
+            Gui.Init();
+
+            GuiRenderer.Initialize(Renderer);
+        }
+
+        private void InitializeDispatcher()
+        {
+            Dispatcher = new Dispatcher();
+        }
+
+        private void RunFrame()
+        {
+            // this is everything to do:
+            // - update input
+            // - update time
+            // - update window
+            // - update gui input
+            // - draw
+            // - update
+            // - physics update
+            // - post update
+            // - draw gui
+            // - present
+
+            Input.Reset();
+
+            Time.Update();
+
+            WindowManager.HandleEvents();
+
+            if (!IsRunning)
+            {
+                return;
+            }
+            
+            Gui.Update();
+
+            Gui.Begin();
+
+            Input.CallKeyCommandBindings();
+
+            Renderer.SetRenderTarget(Renderer.GetWindowRenderTarget());
+
+            OnRender();
+
+            Dispatcher.BroadcastMessage(MessageType.OnGui, null);
+
+            OnGui();
+
+            OnUpdate();
+
+            Gui.End();
+            
+            GuiRenderer.Render();
+
+            Output.Present(Renderer.VSyncEnabled ? 1 : 0);
+        }
 
         public Application()
         {
 
         }
 
-        internal Scene Run()
+        public void Exit()
         {
-            Renderer = Renderer.Create(GraphicsApi.Direct3D11);
-
-            WindowManager = WindowManager.Create();
-            
-            var factoryApis = WindowManager.GetSupportedApis();
-
-            if (!factoryApis.Contains(Renderer.Api))
-                throw new Exception("Rendering output factory doesnt not support this api!");
-
-            Output = WindowManager.CreateOutput(Renderer);
-
-            Renderer.SetRenderingOutput(Output);
-
-            Input.SetDevice(WindowManager.CreateInputDevice());
-
-            Dispatcher = new Dispatcher();
-
-            Dispatcher.BroadcastMessage(MessageType.Init, null);
-
-            GuiRenderer.Initialize(Renderer);
-
-            IsRunning = true;
-
-            // init everything
-            while (IsRunning)
-            {
-                // this is everything to do:
-                // - update window
-                // - update time
-                // - update input
-                // - update gui input
-                // - draw
-                // - update
-                // - physics update
-                // - post update
-                // - draw gui
-                // - present
-
-                Time.Update();
-                Input.Update();
-                WindowManager.HandleEvents();
-
-                // update input
-                
-                Gui.Update();
-
-                Gui.Begin();
-
-                Input.CallKeyCommandBindings();
-
-                // render game
-
-                Scene.Render();
-
-                Renderer.SetRenderTarget(Output.GetRenderTarget());
-                Renderer.Clear(Color.FromKnownColor(KnownColor.CornflowerBlue));
-
-                Dispatcher.BroadcastMessage(MessageType.OnGui, null);
-
-                // update game
-                Scene.Update();
-
-                Gui.End();
-                GuiRenderer.Render();
-
-
-                Output.Present(1);
-            }
-
-            Exit(0);
+            IsRunning = false;
         }
+
+        private void Destroy()
+        {
+            // dispose everything
+            GuiRenderer.Uninitialize();
+            this.Renderer.Destroy();
+            this.WindowManager.Dispose();
+            this.Output.Dispose();
+            this.Dispatcher.BroadcastMessage(MessageType.Destroy, null);
+            
+        }
+
         static Application()
         {
             Service.RegisterAssembly(typeof(Application).Assembly);
         }
-        public static void Exit(int code)
+
+        public static void Start(Application application)
         {
-            // dispose everything
-            GuiRenderer.Uninitialize();
-            Renderer.Dispose();
-            WindowManager.Dispose();
-            Output.Dispose();
-            Dispatcher.BroadcastMessage(MessageType.Destroy, null);
-            Environment.Exit(code);
+            if (Current != null)
+            {
+                throw new Exception("An application is already running!");
+            }
+
+            Current = application;
+
+            application.InitializePlatform();
+
+            application.InitializeGraphics();
+
+            application.InitializeDispatcher();
+            
+            application.IsRunning = true;
+
+            application.Dispatcher.BroadcastMessage(MessageType.Init, null);
+
+            application.OnInitialize();
+
+            // init everything
+            while (application.IsRunning)
+            {
+                application.RunFrame();
+            }
+
+            application.Destroy();
         }
     }
 }

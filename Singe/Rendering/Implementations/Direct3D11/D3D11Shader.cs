@@ -8,8 +8,10 @@ using Vortice.Direct3D11.Shader;
 
 namespace Singe.Rendering.Implementations.Direct3D11
 {
-    internal abstract class D3D11Shader<T> : IShader, IDisposable where T : ID3D11DeviceChild
+    internal abstract class D3D11Shader<T> : IShader, IDestructableResource where T : ID3D11DeviceChild
     {
+        public string DebugName => shader.DebugName;
+
         private protected D3D11Renderer Renderer { get; private set; }
 
         private D3D11ShaderReflector reflector;
@@ -18,26 +20,18 @@ namespace Singe.Rendering.Implementations.Direct3D11
 
         private protected abstract T CreateShader(byte[] compiledBytecode);
 
-        public D3D11Shader(D3D11Renderer renderer, string source, string hlslProfile)
+        public D3D11Shader(D3D11Renderer renderer, byte[] bytecode)
         {
             this.Renderer = renderer;
-            var hr = Compiler.Compile(source, "main", null, hlslProfile, out Blob blob, out Blob err);
-            if(hr.Failure)
-            {
-                throw new Exception(err.ConvertToString());
-            }
 
-            bytecode = blob.GetBytes();
+            this.bytecode = bytecode;
 
-            hr = Compiler.Reflect(bytecode, out ID3D11ShaderReflection reflection);
+            var hr = Compiler.Reflect(bytecode, out ID3D11ShaderReflection reflection);
 
             if (hr.Failure)
                 throw new Exception(hr.Code.ToString());
 
             this.reflector = new D3D11ShaderReflector(reflection);
-
-            blob?.Dispose();
-            err?.Dispose();
 
             this.shader = this.CreateShader(this.bytecode);
         }
@@ -57,10 +51,15 @@ namespace Singe.Rendering.Implementations.Direct3D11
             return bytecode;
         }
 
-        public void Dispose()
+        public void Destroy()
         {
             shader.Dispose();
             reflector.Dispose();
+        }
+
+        public void SetDebugName(string name)
+        {
+            shader.DebugName = name;
         }
     }
 }

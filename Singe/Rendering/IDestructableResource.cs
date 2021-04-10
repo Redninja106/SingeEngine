@@ -4,7 +4,8 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public interface IPixelShader : IShader
+    internal interface IDestructableResource
     {
+        void Destroy();
     }
 }

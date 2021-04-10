@@ -2,10 +2,11 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace Singe
+namespace Singe.Rendering
 {
-    public sealed class SceneFile
+    public enum FillMode
     {
-
+        Solid,
+        Wireframe,
     }
 }

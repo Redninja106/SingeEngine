@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Vortice.D3DCompiler;
+using Vortice.Direct3D;
 using Vortice.Direct3D11;
 using Vortice.DXGI;
 
@@ -8,6 +10,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
 {
     internal static class D3D11Util
     {
+        public static readonly Guid WKPDID_D3DDebugObjectName = new Guid(0x429b8c22, 0x9188, 0x4b0c, 0x87, 0x42, 0xac, 0xb0, 0xbf, 0x85, 0xc2, 0x00);
         public static D3D11VertexShader GetAsD3D11(this IVertexShader shader)
         {
             return (D3D11VertexShader)shader;
@@ -52,6 +55,22 @@ namespace Singe.Rendering.Implementations.Direct3D11
                 result[i] = new InputElementDescription(layout[i].Semantic, layout[i].SemanticIndex, format, 0);
             }
             return result;
+        }
+        public static byte[] Compile(string source, string hlslProfile)
+        {
+            var hr = Compiler.Compile(source, "main", null, hlslProfile, out Blob blob, out Blob err);
+
+            if (hr.Failure)
+            {
+                var ex = new Exception(err.ConvertToString());
+                err.Dispose();
+                throw ex;
+            }
+
+            var bytes = blob.GetBytes();
+            blob.Dispose();
+            err?.Dispose();
+            return bytes;
         }
     }
 }

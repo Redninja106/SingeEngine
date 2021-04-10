@@ -8,7 +8,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
 {
     internal class D3D11PixelShader : D3D11Shader<ID3D11PixelShader>, IPixelShader
     {
-        public D3D11PixelShader(D3D11Renderer renderer, string source) : base(renderer, source, "ps_4_0")
+        public D3D11PixelShader(D3D11Renderer renderer, byte[] bytecode) : base(renderer, bytecode)
         {
         }
 

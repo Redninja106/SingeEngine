@@ -4,7 +4,10 @@ using System.Text;
 
 namespace Singe.Rendering
 {
-    public interface IPixelShader : IShader
+    public enum CullMode
     {
+        None,
+        Clockwise,
+        CounterClockwise,
     }
 }

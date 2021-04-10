@@ -12,7 +12,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
     {
         ID3D11InputLayout inputLayout;
 
-        public D3D11VertexShader(D3D11Renderer renderer, string source) : base(renderer, source, "vs_4_0")
+        public D3D11VertexShader(D3D11Renderer renderer, byte[] bytecode) : base(renderer, bytecode)
         {
             SetExplicitVertexLayout(null);
         }

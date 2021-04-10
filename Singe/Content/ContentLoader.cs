@@ -40,7 +40,9 @@ namespace Singe.Content
                 if (nameAssemblyMap.ContainsKey(name))
                     continue;
 
-                nameAssemblyMap.Add(name, assembly);
+                var shortName = name.Substring(name.IndexOf('.') + 1);
+                shortName = shortName.Substring(shortName.IndexOf('.') + 1);
+                nameAssemblyMap.Add(shortName, assembly);
             }
         }
 
@@ -73,8 +75,13 @@ namespace Singe.Content
             // get the asset's assembly
             var assembly = nameAssemblyMap[path];
 
+            // replace slashes
+            path.Replace('/', '.');
+            path.Replace('\\', '.');
+
+            var fullPath = assembly.GetName().Name + ".Assets." + path;
             // get the stream
-            return assembly.GetManifestResourceStream(path);
+            return assembly.GetManifestResourceStream(fullPath);
         }
         
         /// <summary>
@@ -85,6 +92,11 @@ namespace Singe.Content
         public static string GetAssetString(string path)
         {
             Stream stream = GetAssetStream(path);
+
+            if(stream == null)
+            {
+                return null;
+            }
 
             StreamReader reader = new StreamReader(stream);
 

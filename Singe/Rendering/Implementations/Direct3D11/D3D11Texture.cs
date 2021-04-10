@@ -6,7 +6,7 @@ using Vortice.DXGI;
 
 namespace Singe.Rendering.Implementations.Direct3D11
 {
-    internal sealed class D3D11Texture : Texture, IDisposable
+    internal sealed class D3D11Texture : Texture, IDestructableResource
     {
         D3D11Renderer renderer;
         private ID3D11Texture2D d3d11Texture;
@@ -14,6 +14,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
         ID3D11SamplerState samplerState;
         ID3D11ShaderResourceView shaderResourceView;
 
+        public string DebugName => this.d3d11Texture.DebugName;
         public override int Width => this.width;
         public override int Height => this.height;
         public override int BytesPerPixel => this.bbp;
@@ -50,10 +51,14 @@ namespace Singe.Rendering.Implementations.Direct3D11
             this.bbp = tex.Description.Format.SizeOfInBytes();
         }
 
-        public override void Dispose()
+        public void Destroy()
         {
             d3d11Texture.Dispose();
-            base.Dispose();
+            renderTargetView?.Dispose();
+            samplerState?.Dispose();
+            shaderResourceView?.Dispose();
+
+            DestroyTextureId();
         }
 
         public ID3D11RenderTargetView GetRenderTargetView()
@@ -102,6 +107,11 @@ namespace Singe.Rendering.Implementations.Direct3D11
         public override void SetData<T>(T[] data)
         {
             renderer.GetContext().UpdateSubresource(data, d3d11Texture, 0, d3d11Texture.Description.Format.SizeOfInBytes() * this.d3d11Texture.Description.Width, 0);
+        }
+
+        public override void SetDebugName(string name)
+        {
+            this.d3d11Texture.DebugName = name;
         }
     }
 }

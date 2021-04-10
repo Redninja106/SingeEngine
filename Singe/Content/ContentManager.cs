@@ -21,8 +21,6 @@ namespace Singe.Content
         
         public static void Init()
         {
-            var text = ContentLoader.GetAssetString("SingeTestGame.Assets.text.txt");
-            Log.WriteLine(text);
         }
 
         public static void Destroy()

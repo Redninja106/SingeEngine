@@ -42,7 +42,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
             var context = this.renderer.GetContext();
             
-            if (this.Material.IsApplied)
+            if (this.Material.IsBound)
             {
                 var s = (D3D11PixelShader)this.GetShader();
                 context.PSSetShader(s.GetShader());
@@ -56,7 +56,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
             var context = this.renderer.GetContext();
 
-            if (this.Material.IsApplied)
+            if (this.Material.IsBound)
             {
                 context.PSSetConstantBuffer(index, constantBuffers[index]);
             }
@@ -68,7 +68,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
 
             var context = this.renderer.GetContext();
 
-            if (this.Material.IsApplied)
+            if (this.Material.IsBound)
             {
                 context.PSSetSampler(index, samplers[index]);
                 context.PSSetShaderResource(index, resourceViews[index]);

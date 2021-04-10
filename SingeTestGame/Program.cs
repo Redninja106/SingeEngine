@@ -9,7 +9,7 @@ namespace SingeTestGame
     {
         static unsafe void Main(string[] args)
         {
-            Application.Run();
+            Application.Start(new Test());
         }
     }
 }

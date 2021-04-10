@@ -18,7 +18,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
 
         public override string[] GetInputTextureNames()
         {
-            string[] result = new string[Application.Renderer.Info.MaxTextureCount];
+            string[] result = new string[Application.Current.Renderer.Info.MaxTextureCount];
 
             foreach (var rsrc in reflection.Resources)
             {
@@ -30,7 +30,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
 
         public override string[] GetConstantBufferNames()
         {
-            string[] result = new string[Application.Renderer.Info.MaxConstantBufferCount];
+            string[] result = new string[Application.Current.Renderer.Info.MaxConstantBufferCount];
 
             for (int i = 0; i < result.Length; i++)
             {

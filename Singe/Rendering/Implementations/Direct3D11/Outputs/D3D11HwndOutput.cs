@@ -65,7 +65,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Outputs
         public void Dispose()
         {
             swapchain.Dispose();
-            rt.Dispose();
+            rt.Destroy();
         }
 
         public GraphicsApi GetGraphicsApi()
