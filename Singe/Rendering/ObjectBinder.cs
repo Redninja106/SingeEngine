@@ -9,7 +9,7 @@ namespace Singe.Rendering
         List<IBindable> boundObjects = new List<IBindable>();
         public void BindObject(IBindable bindableObject)
         {
-            if (bindableObject == null)
+            if (bindableObject == null || boundObjects.Contains(bindableObject))
                 return;
 
             boundObjects.Add(bindableObject);

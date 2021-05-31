@@ -13,8 +13,6 @@ namespace Singe.Rendering.Implementations.Direct3D11
         ID3D11RenderTargetView renderTargetView;
         ID3D11SamplerState samplerState;
         ID3D11ShaderResourceView shaderResourceView;
-
-        public string DebugName => this.d3d11Texture.DebugName;
         public override int Width => this.width;
         public override int Height => this.height;
         public override int BytesPerPixel => this.bbp;
@@ -92,6 +90,23 @@ namespace Singe.Rendering.Implementations.Direct3D11
             return shaderResourceView;
         }
 
+        public override void OnBind(ObjectBinder binder)
+        {
+            switch (this.GetBindableType())
+            {
+                case BindableType.RenderTarget:
+                    renderer.GetContext().OMSetRenderTargets(this.GetRenderTargetView());
+                    break;
+                case BindableType.DepthStencilTarget:
+                    throw new NotImplementedException();
+                    break;
+                default:
+                    break;
+            }
+
+            base.OnBind(binder);
+        }
+
         public void Reset()
         {
             renderTargetView?.Dispose();
@@ -112,6 +127,8 @@ namespace Singe.Rendering.Implementations.Direct3D11
         public override void SetDebugName(string name)
         {
             this.d3d11Texture.DebugName = name;
+
+            base.SetDebugName(name);
         }
     }
 }

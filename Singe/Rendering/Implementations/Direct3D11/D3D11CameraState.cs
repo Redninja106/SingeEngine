@@ -20,10 +20,30 @@ namespace Singe.Rendering.Implementations.Direct3D11
         {
             this.Renderer = renderer;
 
-            blendDesc = BlendDescription.Default;
+            blendDesc = new BlendDescription();
+            blendDesc.RenderTarget[0].IsBlendEnabled = true;
+            blendDesc.RenderTarget[0].SourceBlend = Blend.SourceAlpha;
+            blendDesc.RenderTarget[0].DestinationBlend = Blend.InverseSourceAlpha;
+            blendDesc.RenderTarget[0].BlendOperation = BlendOperation.Add;
+            blendDesc.RenderTarget[0].SourceBlendAlpha = Blend.One;
+            blendDesc.RenderTarget[0].DestinationBlendAlpha = Blend.InverseSourceAlpha;
+            blendDesc.RenderTarget[0].BlendOperationAlpha = BlendOperation.Add;
+            blendDesc.RenderTarget[0].RenderTargetWriteMask = ColorWriteEnable.All;
             dsDesc = DepthStencilDescription.Default;
-            rsDesc = RasterizerDescription.CullNone;
-            
+            dsDesc.DepthEnable = false;
+            dsDesc.DepthFunc = ComparisonFunction.Always;
+            dsDesc.StencilEnable = false;
+            dsDesc.FrontFace.StencilFailOp = dsDesc.FrontFace.StencilDepthFailOp = dsDesc.FrontFace.StencilPassOp = StencilOperation.Keep;
+            dsDesc.FrontFace.StencilFunc = ComparisonFunction.Always;
+            rsDesc = new RasterizerDescription();
+            rsDesc.ScissorEnable = true;
+            rsDesc.DepthClipEnable = true;
+            rsDesc.FillMode = Vortice.Direct3D11.FillMode.Solid;
+            rsDesc.CullMode = Vortice.Direct3D11.CullMode.None;
+
+            UpdateBlendState();
+            UpdateDepthStencilState();
+            UpdateRasterizerState();
         }
 
         D3D11Renderer Renderer;
@@ -64,6 +84,22 @@ namespace Singe.Rendering.Implementations.Direct3D11
         public override void SetClippingRectangles(System.Drawing.Rectangle[] rectangles)
         {
             base.SetClippingRectangles(rectangles);
+
+            if (this.IsBound)
+            {
+                this.ApplyScissorRects();
+            }
+        }
+
+        private void ApplyScissorRects()
+        {
+            if (ClippingRectangles == null || ClippingRectangles.Length == 0)
+            {
+                Renderer.GetContext().RSSetScissorRects(new Rectangle[] { viewport.Bounds });
+                return; 
+            }
+
+            Renderer.GetContext().RSSetScissorRects(this.ClippingRectangles);
         }
 
         public override void SetCullMode(CullMode cullMode)
@@ -135,12 +171,32 @@ namespace Singe.Rendering.Implementations.Direct3D11
             }
         }
 
+        public override void SetBlendMode(BlendMode blendMode)
+        {
+            switch (blendMode)
+            {
+                case BlendMode.Overwrite:
+                    this.blendDesc = BlendDescription.Opaque;
+                    break;
+                case BlendMode.AlphaMultiplied:
+                    this.blendDesc = BlendDescription.AlphaBlend;
+                    break;
+                default:
+                    break;
+            }
+
+            UpdateBlendState();
+
+            base.SetBlendMode(blendMode);
+        }
+
         public override void OnBind(ObjectBinder binder)
         {
             ApplyViewport();
             ApplyRasterizerState();
             ApplyBlendState();
             ApplyDepthStencilState();
+            ApplyScissorRects();
 
             base.OnBind(binder);
         }
@@ -173,15 +229,14 @@ namespace Singe.Rendering.Implementations.Direct3D11
 
             blendState = Renderer.GetDevice().CreateBlendState(this.blendDesc);
 
-            if (this.IsBound)
-            {
-                ApplyBlendState();
-            }
+            
+            ApplyBlendState();
+            
         }
 
         private void ApplyBlendState()
         {
-            Renderer.GetContext().OMSetBlendState(this.blendState);
+            Renderer.GetContext().OMSetBlendState(this.blendState, System.Drawing.Color.Black, unchecked((int)0xFFFFFFFF));
         }
 
         private void UpdateDepthStencilState()

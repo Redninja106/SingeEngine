@@ -78,7 +78,7 @@ namespace SingeTestGame
 
             if (Input.GetKey(Key.RightMouse))
             {
-                if(Input.GetKeyDown(Key.RightMouse))
+                if(Input.GetKeyPressed(Key.RightMouse))
                 {
                     lastMousePos = Vector2.Zero;
                 }

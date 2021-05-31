@@ -10,10 +10,15 @@ namespace Singe.Rendering
     {
         public string DebugName { get; private set; }
 
+        public override BindableType GetBindableType()
+        {
+            return BindableType.CameraState;
+        }
+
         public Rectangle[] ClippingRectangles { get; private set; }
         public FillMode FillMode { get; private set; }
         public CullMode CullMode { get; private set; }
-        public BlendMode AlphaMode { get; private set; }
+        public BlendMode BlendMode { get; private set; }
         public bool DepthEnabled { get; private set; }
         public bool StencilEnabled { get; private set; }
 
@@ -53,6 +58,11 @@ namespace Singe.Rendering
         public virtual void SetStencilEnabled(bool enabled)
         {
             this.StencilEnabled = enabled;
+        }
+
+        public virtual void SetBlendMode(BlendMode blendMode)
+        {
+            this.BlendMode = blendMode;
         }
     }
 }

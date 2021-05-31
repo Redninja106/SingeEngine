@@ -106,7 +106,7 @@ namespace Singe
         {
             foreach (var k in keyCommandBindings.Keys)
             {
-                if(GetKeyDown(k))
+                if(GetKeyPressed(k))
                 {
                     keyCommandBindings[k].ForEach(s => Service.SubmitCommandString(s));
                 }
@@ -128,12 +128,12 @@ namespace Singe
             return pressedKeys.Contains(key);
         }
 
-        public static bool GetKeyDown(Key key)
+        public static bool GetKeyPressed(Key key)
         {
             return downKeys.Contains(key);
         }
 
-        public static bool GetKeyUp(Key key)
+        public static bool GetKeyReleased(Key key)
         {
             return upKeys.Contains(key);
         }

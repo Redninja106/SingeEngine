@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Numerics;
+using System.Runtime.InteropServices;
 using System.Text;
 
 namespace Singe.Debugging
@@ -106,11 +107,12 @@ namespace Singe.Debugging
 
             cameraState = renderer.CreateCameraState();
 
-            cameraState.SetCullMode(CullMode.None);
-            cameraState.SetFillMode(FillMode.Solid);
-            cameraState.SetStencilEnabled(false);
-            cameraState.SetDepthEnabled(false);
-            
+            //cameraState.SetCullMode(CullMode.None);
+            //cameraState.SetFillMode(FillMode.Solid);
+            //cameraState.SetStencilEnabled(false);
+            //cameraState.SetDepthEnabled(false);
+            //cameraState.SetBlendMode(BlendMode.AlphaMultiplied);
+
         }
 
         public static void Uninitialize()
@@ -177,6 +179,7 @@ namespace Singe.Debugging
 
             renderer.SetRenderTarget(renderer.GetWindowRenderTarget());
 
+
             cameraState.SetViewport(new RectangleF(0, 0, drawData.DisplaySize.X, drawData.DisplaySize.Y), 0, 1);
 
             for (int n = 0; n < drawData.CmdListsCount; n++)
@@ -189,14 +192,14 @@ namespace Singe.Debugging
 
                     if (pcmd.UserCallback != IntPtr.Zero)
                     {
-                        var usercallback = (delegate*<void>)pcmd.UserCallback.ToPointer();
-                        usercallback();
+                        var usercallback = Marshal.GetDelegateForFunctionPointer<ImGuiInputTextCallback>(pcmd.UserCallback);
+                        usercallback((ImGuiInputTextCallbackData*)pcmd.UserCallbackData.ToPointer());
                     }
                     else
                     {
                         material.PixelShader.SetTexture(0, textures[pcmd.TextureId]);
                         
-                        //cameraState.SetClippingRectangles(new[] { new Rectangle((int)(pcmd.ClipRect.X), (int)(pcmd.ClipRect.Y), (int)(pcmd.ClipRect.Z), (int)(pcmd.ClipRect.W)) });
+                        cameraState.SetClippingRectangles(new[] { new Rectangle((int)(pcmd.ClipRect.X), (int)(pcmd.ClipRect.Y), (int)(pcmd.ClipRect.Z), (int)(pcmd.ClipRect.W)) });
 
                         mesh.SetOffsets((int)pcmd.ElemCount, idxOffset, vtxOffset);
 

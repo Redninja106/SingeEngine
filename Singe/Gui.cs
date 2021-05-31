@@ -57,10 +57,10 @@ namespace Singe
             io.MouseDown[1] = Input.GetKey(Key.RightMouse);
             io.MouseDown[2] = Input.GetKey(Key.MiddleMouse);
             io.MouseWheel = Input.GetScrollDelta();
-            io.KeyCtrl = Input.GetKeyDown(Key.LCtrl) || Input.GetKeyDown(Key.LCtrl);
-            io.KeyAlt = Input.GetKeyDown(Key.LAlt) || Input.GetKeyDown(Key.LAlt);
-            io.KeyShift = Input.GetKeyDown(Key.LShift) || Input.GetKeyDown(Key.LShift);
-            io.KeySuper = Input.GetKeyDown(Key.LMeta) || Input.GetKeyDown(Key.LMeta);
+            io.KeyCtrl = Input.GetKeyPressed(Key.LCtrl) || Input.GetKeyPressed(Key.LCtrl);
+            io.KeyAlt = Input.GetKeyPressed(Key.LAlt) || Input.GetKeyPressed(Key.LAlt);
+            io.KeyShift = Input.GetKeyPressed(Key.LShift) || Input.GetKeyPressed(Key.LShift);
+            io.KeySuper = Input.GetKeyPressed(Key.LMeta) || Input.GetKeyPressed(Key.LMeta);
 
             for (int i = 0; i < keys.Count; i++)
             {

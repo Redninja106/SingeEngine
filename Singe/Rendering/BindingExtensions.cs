@@ -49,10 +49,8 @@ namespace Singe.Rendering
             List<IBindable> toUnbind = new List<IBindable>();
             while(enumerator.MoveNext())
             {
-                if (!condition(enumerator.Current))
-                    continue;
-
-                toUnbind.Add(enumerator.Current);
+                if (condition(enumerator.Current))
+                    toUnbind.Add(enumerator.Current);
             }
 
             foreach (var bindable in toUnbind)

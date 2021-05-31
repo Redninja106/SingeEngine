@@ -82,6 +82,7 @@ namespace Singe.Rendering.Implementations.Direct3D11
         public override void OnBind(ObjectBinder binder)
         {
             var context = renderer.GetContext();
+
             context.IASetVertexBuffers(0, new VertexBufferView(this.VertexBuffer, vertexSize));
 
             context.IASetPrimitiveTopology(ConvertPrimitive(this.primitiveType));
