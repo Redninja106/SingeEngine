@@ -98,7 +98,7 @@ namespace Singe.Content
                 return null;
             }
 
-            StreamReader reader = new StreamReader(stream);
+            var reader = new StreamReader(stream);
 
             return reader.ReadToEnd();
         }

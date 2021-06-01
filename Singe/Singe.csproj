@@ -15,7 +15,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Assets\Shaders\Shapes\shapesPs.hlsl" />
+    <None Remove="Assets\Shaders\Shapes\shapesVs.hlsl" />
     <None Remove="ToolWindow1Control.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\Shaders\Shapes\shapesPs.hlsl" />
+    <EmbeddedResource Include="Assets\Shaders\Shapes\shapesVs.hlsl" />
   </ItemGroup>
 
   <ItemGroup>

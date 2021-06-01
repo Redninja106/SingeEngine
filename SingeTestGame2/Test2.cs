@@ -65,7 +65,7 @@ namespace SingeTestGame2
 
         public override void OnUpdate()
         {
-            if (Input.GetKeyDown(Key.Tab))
+            if (Input.GetKeyPressed(Key.Tab))
             {
                 open = !open;
             }

@@ -35,7 +35,7 @@ namespace Singe.Debugging.Windows
                     var item = items[selectedIndex];
                     try
                     {
-                        ImGui.Text(DocService.GetDoc(item));
+                        ImGui.Text(Commander.Documentation.DocService.GetDoc(item));
                     }
                     catch
                     {
