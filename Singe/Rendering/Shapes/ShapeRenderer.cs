@@ -41,13 +41,8 @@ namespace Singe.Rendering.Shapes
         {
 			var projection = Matrix3x2.Identity;// Matrix3x2.CreateScale(1f/*window.GetSize().Width / (float)window.GetSize().Height*/, 1f);
 
-			var matrix = new[] 
-			{ 
-				1f, 0f,
-				0f, 1f,
-				0f,
-			};
-
+			var matrix = new[] { 1, 0, 0, 1, 0, 0 };
+			
 			testMatrix test;
 
             for (int i = 0; i < matrix.Length; i++)

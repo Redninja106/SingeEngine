@@ -1,6 +1,7 @@
 ﻿cbuffer ProjectionMatrix
 {
 	float3x2 proj;
+	float2 filler;
 };
 
 struct VS_IN
@@ -17,7 +18,9 @@ PS_IN main(VS_IN input)
 {
 	PS_IN output;
 
-	output.position = float4(mul(input.position, proj), 1, 1);
+	//float3x2 identity = { 1, 0, 0, 1, 0, 0 };
+	input.position = mul(proj, input.position);
+	output.position = float4(input.position, 1, 1);
 	//output.uv = input.position % 1.0;
 
 	return output;

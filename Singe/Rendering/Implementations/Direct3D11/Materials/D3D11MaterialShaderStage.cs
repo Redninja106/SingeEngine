@@ -31,7 +31,7 @@ namespace Singe.Rendering.Implementations.Direct3D11.Materials
                 constantBuffersData = new ValueType[renderer.Info.MaxConstantBufferCount];
             }
 
-            if (constantBuffers[index] != null && constantBuffers[index].Description.SizeInBytes == sizeof(TType))
+            if (constantBuffers[index] != null && constantBuffers[index].Description.SizeInBytes == sizeof(TType) + (16 - (sizeof(TType) % 16)))
             {
                 UpdateConstantBuffer(constantBuffers[index], value);
             }
